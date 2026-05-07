@@ -1,5 +1,6 @@
 package com.budakattu.sante.data.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -14,6 +15,7 @@ class AndroidNetworkMonitor @Inject constructor(
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     override val isOnline: Boolean
+        @SuppressLint("MissingPermission")
         get() {
             val network = connectivityManager.activeNetwork ?: return false
             val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
