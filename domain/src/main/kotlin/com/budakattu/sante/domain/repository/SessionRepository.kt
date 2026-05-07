@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface SessionRepository {
     fun observeSession(): Flow<SessionState>
     suspend fun completeOnboarding()
-    suspend fun signIn(name: String, role: UserRole)
+    suspend fun signIn(email: String, password: String)
+    suspend fun signInWithGoogle(idToken: String)
+    suspend fun signUp(name: String, email: String, password: String, role: UserRole)
     suspend fun signOut()
 }

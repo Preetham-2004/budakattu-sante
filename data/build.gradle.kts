@@ -25,8 +25,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.hilt.android)
+    implementation(libs.googleid)
     implementation(libs.kotlinx.coroutines.android)
     ksp(libs.hilt.compiler)
 

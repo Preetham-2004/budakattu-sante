@@ -1,7 +1,7 @@
 package com.budakattu.sante.di
 
-import com.budakattu.sante.data.repository.LocalSessionRepository
 import com.budakattu.sante.data.repository.FirestoreProductRepository
+import com.budakattu.sante.data.repository.FirebaseSessionRepository
 import com.budakattu.sante.data.util.AndroidNetworkMonitor
 import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.repository.ProductRepository
@@ -30,6 +30,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSessionRepository(
-        localSessionRepository: LocalSessionRepository,
+        firebaseSessionRepository: FirebaseSessionRepository,
     ): SessionRepository
 }

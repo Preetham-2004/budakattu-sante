@@ -10,6 +10,7 @@ import androidx.navigation.navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.budakattu.sante.feature.auth.AuthViewModel
 import com.budakattu.sante.feature.auth.LoginScreen
 import com.budakattu.sante.feature.auth.OnboardingScreen
@@ -18,7 +19,6 @@ import com.budakattu.sante.feature.auth.SplashRoute
 import com.budakattu.sante.feature.catalog.ui.CatalogRoute
 import com.budakattu.sante.feature.leader.LeaderDashboardScreen
 import com.budakattu.sante.feature.productdetail.ProductDetailRoute
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun BudakattuNavHost(
@@ -69,6 +69,7 @@ private fun androidx.navigation.NavGraphBuilder.authGraph(navController: NavHost
         composable(NavRoutes.SIGNUP) {
             SignupScreen(
                 onSignupComplete = { navController.navigate(NavRoutes.SPLASH) { popUpTo(NavRoutes.SIGNUP) { inclusive = true } } },
+                onLogin = { navController.navigate(NavRoutes.LOGIN) { popUpTo(NavRoutes.SIGNUP) { inclusive = true } } },
             )
         }
     }
