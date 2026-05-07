@@ -21,16 +21,14 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(platform(libs.firebase.bom))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.firebase.firestore)
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)
     ksp(libs.hilt.compiler)
-    ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
