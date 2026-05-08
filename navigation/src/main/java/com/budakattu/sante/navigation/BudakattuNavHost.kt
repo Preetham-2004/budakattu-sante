@@ -21,6 +21,11 @@ import com.budakattu.sante.feature.auth.SplashRoute
 import com.budakattu.sante.feature.catalog.ui.CatalogRoute
 import com.budakattu.sante.feature.leader.LeaderDashboardScreen
 import com.budakattu.sante.feature.leader.LeaderProductEntryRoute
+import com.budakattu.sante.feature.orders.BuyerOrdersRoute
+import com.budakattu.sante.feature.orders.CartRoute
+import com.budakattu.sante.feature.orders.LeaderOrdersRoute
+import com.budakattu.sante.feature.orders.OrderConfirmationRoute
+import com.budakattu.sante.feature.orders.OrderDetailRoute
 import com.budakattu.sante.feature.productdetail.ProductDetailRoute
 
 @Composable
@@ -100,12 +105,57 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
             )
         }
         composable(NavRoutes.ORDERS) {
-            OrdersRouteScreen(
+            BuyerOrdersRoute(
+                activeRoute = NavRoutes.ORDERS,
+                marketRoute = NavRoutes.CATALOG,
+                heritageRoute = NavRoutes.HERITAGE,
+                ordersRoute = NavRoutes.ORDERS,
+                profileRoute = NavRoutes.PROFILE,
                 onNavigate = { route ->
                     navController.navigate(route) {
                         launchSingleTop = true
                     }
                 },
+                onOpenCart = { navController.navigate(NavRoutes.CART) },
+                onOpenOrder = { orderId ->
+                    navController.navigate("${NavRoutes.ORDER_DETAIL_PREFIX}/$orderId")
+                },
+            )
+        }
+        composable(NavRoutes.CART) {
+            CartRoute(
+                onBack = { navController.popBackStack() },
+                onOpenConfirmation = { orderId ->
+                    navController.navigate("${NavRoutes.ORDER_CONFIRMATION_PREFIX}/$orderId") {
+                        popUpTo(NavRoutes.CART) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(
+            route = NavRoutes.ORDER_CONFIRMATION,
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            OrderConfirmationRoute(
+                orderId = backStackEntry.arguments?.getString("orderId").orEmpty(),
+                onViewOrders = {
+                    navController.navigate(NavRoutes.ORDERS) {
+                        popUpTo(NavRoutes.CATALOG)
+                    }
+                },
+                onBackToMarket = {
+                    navController.navigate(NavRoutes.CATALOG) {
+                        popUpTo(NavRoutes.CATALOG)
+                    }
+                },
+            )
+        }
+        composable(
+            route = NavRoutes.ORDER_DETAIL,
+            arguments = listOf(navArgument("orderId") { type = NavType.StringType }),
+        ) {
+            OrderDetailRoute(
+                onBack = { navController.popBackStack() },
             )
         }
         composable(NavRoutes.PROFILE) {
@@ -159,6 +209,9 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
                 onAddProduct = {
                     navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
                 },
+                onOpenOrders = {
+                    navController.navigate(NavRoutes.LEADER_ORDERS)
+                },
                 onSignOut = {
                     authViewModel.signOut()
                     navController.navigate(NavRoutes.AUTH_GRAPH) {
@@ -169,6 +222,11 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
         }
         composable(NavRoutes.LEADER_ADD_PRODUCT) {
             LeaderProductEntryRoute(
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(NavRoutes.LEADER_ORDERS) {
+            LeaderOrdersRoute(
                 onBack = { navController.popBackStack() },
             )
         }

@@ -30,6 +30,7 @@ include(":data")
 include(":feature:auth")
 include(":feature:catalog")
 include(":feature:leader")
+include(":feature:orders")
 include(":feature:productdetail")
 include(":navigation")
  

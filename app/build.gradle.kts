@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":feature:auth"))
     implementation(project(":feature:catalog"))
     implementation(project(":feature:leader"))
+    implementation(project(":feature:orders"))
     implementation(project(":feature:productdetail"))
     implementation(project(":navigation"))
 

@@ -24,7 +24,7 @@ class FirestoreProductRepository @Inject constructor(
     override fun getProducts(): Flow<List<Product>> = callbackFlow {
         val listener = collection.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error)
+                trySend(emptyList())
                 return@addSnapshotListener
             }
 
@@ -40,7 +40,7 @@ class FirestoreProductRepository @Inject constructor(
     override fun getProduct(productId: String): Flow<Product?> = callbackFlow {
         val listener = collection.document(productId).addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error)
+                trySend(null)
                 return@addSnapshotListener
             }
             trySend(snapshot?.toProductDomain())

@@ -4,9 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.budakattu.sante.domain.model.ProductAvailability
+import com.budakattu.sante.domain.model.SessionState
 import com.budakattu.sante.domain.repository.NetworkMonitor
+import com.budakattu.sante.domain.usecase.order.AddToCartUseCase
 import com.budakattu.sante.domain.usecase.product.GetProductUseCase
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
+import com.budakattu.sante.domain.usecase.session.ObserveSessionUseCase
 import com.budakattu.sante.domain.util.MspValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -22,10 +26,13 @@ class ProductDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getProductUseCase: GetProductUseCase,
     getProductsUseCase: GetProductsUseCase,
+    observeSessionUseCase: ObserveSessionUseCase,
+    private val addToCartUseCase: AddToCartUseCase,
     private val networkMonitor: NetworkMonitor,
     private val mspValidator: MspValidator,
 ) : ViewModel() {
     private val productId: String = savedStateHandle.get<String>("productId").orEmpty()
+    private val sessionState = observeSessionUseCase()
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -53,8 +60,8 @@ class ProductDetailViewModel @Inject constructor(
                             mspLabel = "MSP Rs ${product.mspPerUnit.toInt()} per ${product.unit}",
                             isMspSafe = !mspValidator.isBelowMsp(product.pricePerUnit, product.mspPerUnit),
                             stockLabel = when (product.availability) {
-                                ProductAvailability.IN_STOCK -> "${product.stockQty} ${product.unit} available now"
-                                ProductAvailability.PREBOOK_OPEN -> "${product.currentPrebookCount}/${product.maxPrebookQuantity} units reserved"
+                                ProductAvailability.IN_STOCK -> "${product.availableStock} ${product.unit} available now"
+                                ProductAvailability.PREBOOK_OPEN -> "${product.reservedStock}/${product.preorderLimit} units reserved"
                                 ProductAvailability.COMING_SOON -> "Manufacturing or harvest is not complete yet"
                                 ProductAvailability.SOLD_OUT -> "This batch is currently closed"
                             },
@@ -99,15 +106,37 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    fun onPreorderClick() {
+    fun addToCart(quantity: Int) {
         viewModelScope.launch {
-            val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
-            val action = if (state.product.ctaLabel.contains("Buy", ignoreCase = true)) {
-                "Purchase"
-            } else {
-                "Pre-book"
-            }
-            _events.emit("$action request captured for ${state.product.name}.")
+            addToCartInternal(quantity, notifySuccess = true)
         }
+    }
+
+    fun onPreorderClick(quantity: Int) {
+        viewModelScope.launch {
+            if (!addToCartInternal(quantity, notifySuccess = false)) return@launch
+            val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
+            val action = if (state.product.ctaLabel.contains("Buy", ignoreCase = true)) "Purchase" else "Pre-book"
+            _events.emit("$action request prepared. Review it in your cart.")
+        }
+    }
+
+    private suspend fun addToCartInternal(quantity: Int, notifySuccess: Boolean): Boolean {
+        val userId = when (val session = sessionState.first()) {
+            is SessionState.LoggedIn -> session.userId
+            else -> {
+                _events.emit("Please sign in to continue.")
+                return false
+            }
+        }
+        return runCatching {
+            addToCartUseCase(userId = userId, productId = productId, quantity = quantity)
+        }.onSuccess {
+            if (notifySuccess) {
+                _events.emit("Added to cart.")
+            }
+        }.onFailure { error ->
+            _events.emit(error.localizedMessage ?: "Unable to add to cart")
+        }.isSuccess
     }
 }

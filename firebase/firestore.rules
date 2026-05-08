@@ -31,21 +31,37 @@ service cloud.firestore {
     }
 
     match /cooperatives/{cooperativeId}/products/{productId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create, update, delete: if isLeader() &&
         request.resource.data.cooperativeId == cooperativeId;
     }
 
+    match /carts/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /carts/{uid}/order_items/{itemId} {
+      allow read, write: if isOwner(uid);
+    }
+
     match /orders/{orderId} {
       allow create: if isBuyer() &&
-        request.resource.data.buyerUid == request.auth.uid;
+        request.resource.data.userId == request.auth.uid;
       allow read: if isSignedIn() && (
-        resource.data.buyerUid == request.auth.uid || isLeader()
+        resource.data.userId == request.auth.uid || isLeader()
       );
       allow update: if isLeader() || (
-        isBuyer() && resource.data.buyerUid == request.auth.uid
+        isBuyer() && resource.data.userId == request.auth.uid
       );
       allow delete: if false;
+    }
+
+    match /orders/{orderId}/order_items/{itemId} {
+      allow read: if isSignedIn() && (
+        get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid ||
+        isLeader()
+      );
+      allow write: if isSignedIn();
     }
   }
 }

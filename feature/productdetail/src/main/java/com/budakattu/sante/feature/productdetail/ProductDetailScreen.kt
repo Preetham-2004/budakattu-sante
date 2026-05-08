@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -22,7 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +79,7 @@ fun ProductDetailRoute(
                 viewModel.onAudioDescriptionClick()
             }
         },
+        onAddToCart = viewModel::addToCart,
         onPreorderClick = viewModel::onPreorderClick,
     )
 }
@@ -84,7 +89,8 @@ fun ProductDetailScreen(
     uiState: ProductDetailUiState,
     snackbarHostState: SnackbarHostState,
     onAudioDescriptionClick: () -> Unit,
-    onPreorderClick: () -> Unit,
+    onAddToCart: (Int) -> Unit,
+    onPreorderClick: (Int) -> Unit,
 ) {
     HeritageScaffold(
         title = "Product Chronicle",
@@ -102,6 +108,7 @@ fun ProductDetailScreen(
                     outerPadding = outerPadding,
                     innerPadding = innerPadding,
                     onAudioDescriptionClick = onAudioDescriptionClick,
+                    onAddToCart = onAddToCart,
                     onPreorderClick = onPreorderClick,
                 )
             }
@@ -143,9 +150,11 @@ private fun DetailContent(
     outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onAudioDescriptionClick: () -> Unit,
-    onPreorderClick: () -> Unit,
+    onAddToCart: (Int) -> Unit,
+    onPreorderClick: (Int) -> Unit,
 ) {
     val product = state.product
+    var quantity by remember(product.id) { mutableIntStateOf(1) }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -209,7 +218,33 @@ private fun DetailContent(
                 Button(modifier = Modifier.weight(1f), onClick = onAudioDescriptionClick) {
                     Text("Hear audio")
                 }
-                Button(modifier = Modifier.weight(1f), onClick = onPreorderClick) {
+                Button(modifier = Modifier.weight(1f), onClick = { onAddToCart(quantity) }) {
+                    Text("Add to cart")
+                }
+            }
+        }
+        item {
+            ForestCard {
+                Text("Order quantity", style = MaterialTheme.typography.titleLarge)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button(onClick = { if (quantity > 1) quantity -= 1 }) { Text("-") }
+                    Text(quantity.toString(), style = MaterialTheme.typography.headlineSmall)
+                    Button(onClick = { quantity += 1 }) { Text("+") }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("unit(s)")
+                }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    onClick = { onPreorderClick(quantity) },
+                ) {
                     Text(product.ctaLabel)
                 }
             }

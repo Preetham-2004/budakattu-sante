@@ -12,6 +12,7 @@ import com.budakattu.sante.domain.usecase.session.SignOutUseCase
 import com.budakattu.sante.domain.usecase.session.SignUpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,7 @@ class AuthViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase,
 ) : ViewModel() {
     val sessionState: StateFlow<SessionState> = observeSessionUseCase()
+        .catch { emit(SessionState.LoggedOut(onboardingCompleted = true)) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.Loading)
 
     private val _uiState = MutableStateFlow(AuthUiState())

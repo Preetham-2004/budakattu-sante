@@ -75,13 +75,13 @@ class LeaderProductFormViewModel @Inject constructor(
                         pricePerUnit = current.price.toFloat(),
                         mspPerUnit = current.msp.toFloat(),
                         unit = current.unit.trim(),
-                        stockQty = current.quantity.toInt(),
+                        availableStock = current.quantity.toInt(),
                         season = current.season.trim().takeIf { it.isNotBlank() },
                         imageUrls = listOfNotNull(current.imageUrl.trim().takeIf { it.isNotBlank() }),
                         availability = current.availability,
                         isPrebookEnabled = current.isPrebookEnabled,
                         expectedDispatchDate = current.expectedDispatch.trim().takeIf { it.isNotBlank() },
-                        maxPrebookQuantity = current.prebookLimit.toIntOrNull() ?: 0,
+                        preorderLimit = current.prebookLimit.toIntOrNull() ?: 0,
                     ),
                 )
             }.onSuccess {

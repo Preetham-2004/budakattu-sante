@@ -47,7 +47,8 @@ class FirebaseSessionRepository @Inject constructor(
                     .document(user.uid)
                     .addSnapshotListener { snapshot, error ->
                         if (error != null) {
-                            close(error)
+                            trySend(SessionState.LoggedOut(onboardingCompleted = onboardingCompleted))
+                            launch { firebaseAuth.signOut() }
                             return@addSnapshotListener
                         }
 
@@ -66,6 +67,7 @@ class FirebaseSessionRepository @Inject constructor(
                                     userId = user.uid,
                                     name = profile.name.ifBlank { user.email.orEmpty() },
                                     role = profile.role.toUserRole(),
+                                    cooperativeId = profile.cooperativeId,
                                     onboardingCompleted = profile.onboardingCompleted,
                                 ),
                             )

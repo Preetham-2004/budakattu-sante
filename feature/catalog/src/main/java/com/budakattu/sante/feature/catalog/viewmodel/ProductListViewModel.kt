@@ -42,7 +42,7 @@ class ProductListViewModel @Inject constructor(
 
     private fun loadProducts() {
         viewModelScope.launch {
-            seedCatalogUseCase()
+            runCatching { seedCatalogUseCase() }
             getProductsUseCase()
                 .onStart { _uiState.value = ProductListUiState.Loading }
                 .catch { error ->
@@ -80,8 +80,8 @@ class ProductListViewModel @Inject constructor(
             categoryName = product.categoryName,
             priceLabel = "Rs ${product.pricePerUnit.toInt()}/${product.unit}",
             stockLabel = when (product.availability) {
-                ProductAvailability.IN_STOCK -> "${product.stockQty} ${product.unit} ready"
-                ProductAvailability.PREBOOK_OPEN -> "${product.currentPrebookCount}/${product.maxPrebookQuantity} reserved"
+                ProductAvailability.IN_STOCK -> "${product.availableStock} ${product.unit} ready"
+                ProductAvailability.PREBOOK_OPEN -> "${product.reservedStock}/${product.preorderLimit} reserved"
                 ProductAvailability.COMING_SOON -> "Upcoming seasonal batch"
                 ProductAvailability.SOLD_OUT -> "Currently unavailable"
             },

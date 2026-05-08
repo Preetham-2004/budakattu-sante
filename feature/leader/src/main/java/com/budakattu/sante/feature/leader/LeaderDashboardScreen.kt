@@ -33,6 +33,7 @@ fun LeaderDashboardScreen(
     leaderId: String,
     leaderRoleLabel: String,
     onAddProduct: () -> Unit,
+    onOpenOrders: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     HeritageScaffold(
@@ -134,10 +135,10 @@ fun LeaderDashboardScreen(
                         }
                         OutlinedButton(
                             modifier = Modifier.weight(1f),
-                            onClick = onAddProduct,
+                            onClick = onOpenOrders,
                             shape = RoundedCornerShape(14.dp),
                         ) {
-                            Text("Manage listings")
+                            Text("Pending orders")
                         }
                     }
                 }
