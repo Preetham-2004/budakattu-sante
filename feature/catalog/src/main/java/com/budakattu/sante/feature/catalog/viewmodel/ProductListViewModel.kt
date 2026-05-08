@@ -3,6 +3,7 @@ package com.budakattu.sante.feature.catalog.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.budakattu.sante.domain.model.Product
+import com.budakattu.sante.domain.model.ProductAvailability
 import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
 import com.budakattu.sante.domain.usecase.product.SeedCatalogUseCase
@@ -71,11 +72,28 @@ class ProductListViewModel @Inject constructor(
             id = product.productId,
             name = product.name,
             description = product.description,
+            audioDescription = product.audioDescription,
+            imageUrl = product.imageUrls.firstOrNull()
+                ?: "https://images.unsplash.com/photo-1471943311424-646960669fbc?w=900",
             familyName = product.familyName,
             village = product.village,
             categoryName = product.categoryName,
             priceLabel = "Rs ${product.pricePerUnit.toInt()}/${product.unit}",
-            stockLabel = "${product.stockQty} ${product.unit} ready",
+            stockLabel = when (product.availability) {
+                ProductAvailability.IN_STOCK -> "${product.stockQty} ${product.unit} ready"
+                ProductAvailability.PREBOOK_OPEN -> "${product.currentPrebookCount}/${product.maxPrebookQuantity} reserved"
+                ProductAvailability.COMING_SOON -> "Upcoming seasonal batch"
+                ProductAvailability.SOLD_OUT -> "Currently unavailable"
+            },
+            availabilityLabel = product.availability.name.replace("_", " "),
+            ctaLabel = when (product.availability) {
+                ProductAvailability.IN_STOCK -> "Buy now"
+                ProductAvailability.PREBOOK_OPEN,
+                ProductAvailability.COMING_SOON,
+                ProductAvailability.SOLD_OUT,
+                -> if (product.isPrebookEnabled) "Pre-book now" else "View details"
+            },
+            expectedDispatchLabel = product.expectedDispatchDate,
             seasonLabel = product.season,
             isMspSafe = !mspValidator.isBelowMsp(product.pricePerUnit, product.mspPerUnit),
         )

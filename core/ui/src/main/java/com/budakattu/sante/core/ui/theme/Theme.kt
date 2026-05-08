@@ -12,13 +12,15 @@ private val DarkScheme = darkColorScheme(
     secondary = AmberHarvest,
     background = Color(0xFF1A2410),
     surface = Color(0xFF243318),
+    tertiary = MilletGold,
 )
 
 private val LightScheme = lightColorScheme(
     primary = ForestPrimary,
     secondary = AmberHarvest,
     background = Parchment,
-    surface = Color.White,
+    surface = MistVeil,
+    tertiary = BarkBrown,
 )
 
 @Composable

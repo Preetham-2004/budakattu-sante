@@ -1,5 +1,6 @@
 package com.budakattu.sante.feature.productdetail
 
+import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,19 +19,23 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.ForestCard
+import com.budakattu.sante.core.ui.components.HeritageScaffold
 import com.budakattu.sante.core.ui.components.MspBadge
-import com.budakattu.sante.core.ui.theme.Parchment
+import com.budakattu.sante.core.ui.components.RouteBadge
+import java.util.Locale
 
 @Composable
 fun ProductDetailRoute(
@@ -38,6 +43,18 @@ fun ProductDetailRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val textToSpeech = remember(context) {
+        TextToSpeech(context, null)
+    }
+
+    DisposableEffect(textToSpeech) {
+        textToSpeech.language = Locale.ENGLISH
+        onDispose {
+            textToSpeech.stop()
+            textToSpeech.shutdown()
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { snackbarHostState.showSnackbar(it) }
@@ -46,7 +63,18 @@ fun ProductDetailRoute(
     ProductDetailScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
-        onAudioDescriptionClick = viewModel::onAudioDescriptionClick,
+        onAudioDescriptionClick = {
+            val state = uiState as? ProductDetailUiState.Success
+            if (state != null) {
+                textToSpeech.speak(
+                    state.product.audioDescription,
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    state.product.id,
+                )
+                viewModel.onAudioDescriptionClick()
+            }
+        },
         onPreorderClick = viewModel::onPreorderClick,
     )
 }
@@ -58,28 +86,35 @@ fun ProductDetailScreen(
     onAudioDescriptionClick: () -> Unit,
     onPreorderClick: () -> Unit,
 ) {
-    Scaffold(
-        containerColor = Parchment,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        when (uiState) {
-            ProductDetailUiState.Loading -> Loading(innerPadding)
-            is ProductDetailUiState.Error -> CenterText(innerPadding, uiState.message)
-            is ProductDetailUiState.Success -> DetailContent(
-                state = uiState,
-                innerPadding = innerPadding,
-                onAudioDescriptionClick = onAudioDescriptionClick,
-                onPreorderClick = onPreorderClick,
-            )
+    HeritageScaffold(
+        title = "Product Chronicle",
+        subtitle = "Each batch carries price discipline, family traceability, and a story rooted in the forest belt.",
+    ) { outerPadding ->
+        Scaffold(
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+        ) { innerPadding ->
+            when (uiState) {
+                ProductDetailUiState.Loading -> Loading(outerPadding, innerPadding)
+                is ProductDetailUiState.Error -> CenterText(outerPadding, innerPadding, uiState.message)
+                is ProductDetailUiState.Success -> DetailContent(
+                    state = uiState,
+                    outerPadding = outerPadding,
+                    innerPadding = innerPadding,
+                    onAudioDescriptionClick = onAudioDescriptionClick,
+                    onPreorderClick = onPreorderClick,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun Loading(innerPadding: PaddingValues) {
+private fun Loading(outerPadding: PaddingValues, innerPadding: PaddingValues) {
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -89,10 +124,11 @@ private fun Loading(innerPadding: PaddingValues) {
 }
 
 @Composable
-private fun CenterText(innerPadding: PaddingValues, text: String) {
+private fun CenterText(outerPadding: PaddingValues, innerPadding: PaddingValues, text: String) {
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -104,6 +140,7 @@ private fun CenterText(innerPadding: PaddingValues, text: String) {
 @Composable
 private fun DetailContent(
     state: ProductDetailUiState.Success,
+    outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onAudioDescriptionClick: () -> Unit,
     onPreorderClick: () -> Unit,
@@ -112,6 +149,7 @@ private fun DetailContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -128,8 +166,14 @@ private fun DetailContent(
         }
         item {
             ForestCard {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    RouteBadge(label = "Mode", value = product.availabilityLabel)
+                    RouteBadge(label = "MSP", value = if (product.isMspSafe) "Protected" else "Below")
+                }
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top,
                 ) {
@@ -142,7 +186,10 @@ private fun DetailContent(
                 Text(product.description, modifier = Modifier.padding(top = 12.dp))
                 Text(product.priceLabel, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 12.dp))
                 Text(product.mspLabel)
-                Text(product.stockLabel)
+                Text(product.stockLabel, modifier = Modifier.padding(top = 8.dp))
+                product.expectedDispatchLabel?.let {
+                    Text(it, modifier = Modifier.padding(top = 4.dp))
+                }
                 if (state.isOffline) {
                     Text("Viewing cached product details offline.", modifier = Modifier.padding(top = 8.dp))
                 }
@@ -163,7 +210,7 @@ private fun DetailContent(
                     Text("Hear audio")
                 }
                 Button(modifier = Modifier.weight(1f), onClick = onPreorderClick) {
-                    Text("Preorder")
+                    Text(product.ctaLabel)
                 }
             }
         }

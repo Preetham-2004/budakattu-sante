@@ -3,6 +3,7 @@ package com.budakattu.sante.feature.productdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.budakattu.sante.domain.model.ProductAvailability
 import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.usecase.product.GetProductUseCase
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
@@ -47,10 +48,25 @@ class ProductDetailViewModel @Inject constructor(
                             name = product.name,
                             categoryName = product.categoryName,
                             description = product.description,
+                            audioDescription = product.audioDescription,
                             priceLabel = "Rs ${product.pricePerUnit.toInt()} per ${product.unit}",
                             mspLabel = "MSP Rs ${product.mspPerUnit.toInt()} per ${product.unit}",
                             isMspSafe = !mspValidator.isBelowMsp(product.pricePerUnit, product.mspPerUnit),
-                            stockLabel = "${product.stockQty} ${product.unit} available",
+                            stockLabel = when (product.availability) {
+                                ProductAvailability.IN_STOCK -> "${product.stockQty} ${product.unit} available now"
+                                ProductAvailability.PREBOOK_OPEN -> "${product.currentPrebookCount}/${product.maxPrebookQuantity} units reserved"
+                                ProductAvailability.COMING_SOON -> "Manufacturing or harvest is not complete yet"
+                                ProductAvailability.SOLD_OUT -> "This batch is currently closed"
+                            },
+                            availabilityLabel = product.availability.name.replace("_", " "),
+                            ctaLabel = when (product.availability) {
+                                ProductAvailability.IN_STOCK -> "Buy now"
+                                ProductAvailability.PREBOOK_OPEN,
+                                ProductAvailability.COMING_SOON,
+                                ProductAvailability.SOLD_OUT,
+                                -> if (product.isPrebookEnabled) "Pre-book now" else "Unavailable"
+                            },
+                            expectedDispatchLabel = product.expectedDispatchDate,
                             seasonLabel = product.season,
                             familyTitle = product.familyName,
                             village = product.village,
@@ -79,13 +95,19 @@ class ProductDetailViewModel @Inject constructor(
 
     fun onAudioDescriptionClick() {
         viewModelScope.launch {
-            _events.emit("Audio descriptions will use Gemini + TTS in the next phase.")
+            _events.emit("Playing accessibility description.")
         }
     }
 
     fun onPreorderClick() {
         viewModelScope.launch {
-            _events.emit("Preorder flow is the next business slice after auth and detail.")
+            val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
+            val action = if (state.product.ctaLabel.contains("Buy", ignoreCase = true)) {
+                "Purchase"
+            } else {
+                "Pre-book"
+            }
+            _events.emit("$action request captured for ${state.product.name}.")
         }
     }
 }

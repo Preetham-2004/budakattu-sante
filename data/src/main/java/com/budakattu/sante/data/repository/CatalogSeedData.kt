@@ -1,6 +1,7 @@
 package com.budakattu.sante.data.repository
 
 import com.budakattu.sante.domain.model.Product
+import com.budakattu.sante.domain.model.ProductAvailability
 
 object CatalogSeedData {
     fun products(): List<Product> {
@@ -12,6 +13,7 @@ object CatalogSeedData {
                 categoryId = "honey",
                 name = "Wild Honey",
                 description = "Raw forest honey collected in small batches from protected hill tracts.",
+                audioDescription = "Wild forest honey from the Jenu Kuruba collective. Rich, raw, and collected in careful seasonal batches.",
                 categoryName = "Honey",
                 familyName = "Jenu Kuruba Collective",
                 village = "Biligiri",
@@ -22,6 +24,11 @@ object CatalogSeedData {
                 isSeasonal = true,
                 season = "Summer",
                 imageUrls = emptyList(),
+                availability = ProductAvailability.IN_STOCK,
+                isPrebookEnabled = false,
+                expectedDispatchDate = null,
+                maxPrebookQuantity = 0,
+                currentPrebookCount = 0,
                 isAvailable = true,
                 addedAt = now,
                 lastModifiedAt = now,
@@ -32,6 +39,7 @@ object CatalogSeedData {
                 categoryId = "forest-produce",
                 name = "Shikakai Pods",
                 description = "Sun-dried pods cleaned and packed for hair care and herbal use.",
+                audioDescription = "Sun-dried shikakai pods prepared for herbal hair care. This batch supports Soliga women farmers from MM Hills.",
                 categoryName = "Forest Produce",
                 familyName = "Soliga Women Farmers",
                 village = "MM Hills",
@@ -42,6 +50,11 @@ object CatalogSeedData {
                 isSeasonal = false,
                 season = null,
                 imageUrls = emptyList(),
+                availability = ProductAvailability.PREBOOK_OPEN,
+                isPrebookEnabled = true,
+                expectedDispatchDate = "Dispatch begins in 12 days",
+                maxPrebookQuantity = 80,
+                currentPrebookCount = 26,
                 isAvailable = true,
                 addedAt = now - 1_000L,
                 lastModifiedAt = now - 1_000L,
@@ -52,6 +65,7 @@ object CatalogSeedData {
                 categoryId = "fruit",
                 name = "Forest Amla",
                 description = "Hand-sorted amla with bright acidity, ideal for pickles and preserves.",
+                audioDescription = "Forest amla with bright acidity, hand-sorted by the Irula growers circle. Suitable for preserves, powders, and pickles.",
                 categoryName = "Fruit",
                 familyName = "Irula Growers Circle",
                 village = "Bandipur Fringe",
@@ -62,6 +76,11 @@ object CatalogSeedData {
                 isSeasonal = true,
                 season = "Monsoon",
                 imageUrls = emptyList(),
+                availability = ProductAvailability.COMING_SOON,
+                isPrebookEnabled = true,
+                expectedDispatchDate = "Harvest opens next month",
+                maxPrebookQuantity = 120,
+                currentPrebookCount = 44,
                 isAvailable = true,
                 addedAt = now - 2_000L,
                 lastModifiedAt = now - 2_000L,

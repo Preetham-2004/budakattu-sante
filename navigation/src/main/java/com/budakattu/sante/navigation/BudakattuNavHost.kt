@@ -1,6 +1,7 @@
 package com.budakattu.sante.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.runtime.collectAsState
 import com.budakattu.sante.feature.auth.AuthViewModel
 import com.budakattu.sante.feature.auth.LoginScreen
 import com.budakattu.sante.feature.auth.OnboardingScreen
@@ -18,6 +20,7 @@ import com.budakattu.sante.feature.auth.SignupScreen
 import com.budakattu.sante.feature.auth.SplashRoute
 import com.budakattu.sante.feature.catalog.ui.CatalogRoute
 import com.budakattu.sante.feature.leader.LeaderDashboardScreen
+import com.budakattu.sante.feature.leader.LeaderProductEntryRoute
 import com.budakattu.sante.feature.productdetail.ProductDetailRoute
 
 @Composable
@@ -82,6 +85,43 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                 onOpenProduct = { productId ->
                     navController.navigate("${NavRoutes.PRODUCT_DETAIL_PREFIX}/$productId")
                 },
+                onOpenRoute = { route ->
+                    navController.navigate(route)
+                },
+            )
+        }
+        composable(NavRoutes.HERITAGE) {
+            HeritageRouteScreen(
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+        composable(NavRoutes.ORDERS) {
+            OrdersRouteScreen(
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+        composable(NavRoutes.PROFILE) {
+            val authViewModel: AuthViewModel = hiltViewModel()
+            ProfileRouteScreen(
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                },
+                onSignOut = {
+                    authViewModel.signOut()
+                    navController.navigate(NavRoutes.AUTH_GRAPH) {
+                        popUpTo(NavRoutes.BUYER_GRAPH) { inclusive = true }
+                    }
+                },
             )
         }
         composable(
@@ -98,13 +138,38 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
     navigation(startDestination = NavRoutes.LEADER_HOME, route = NavRoutes.LEADER_GRAPH) {
         composable(NavRoutes.LEADER_HOME) {
             val authViewModel: AuthViewModel = hiltViewModel()
+            val sessionState by authViewModel.sessionState.collectAsState()
             LeaderDashboardScreen(
+                leaderName = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
+                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).name
+                } else {
+                    "Leader"
+                },
+                leaderId = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
+                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).userId
+                } else {
+                    "--"
+                },
+                leaderRoleLabel = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
+                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).role
+                        .name
+                } else {
+                    "LEADER"
+                },
+                onAddProduct = {
+                    navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
+                },
                 onSignOut = {
                     authViewModel.signOut()
                     navController.navigate(NavRoutes.AUTH_GRAPH) {
                         popUpTo(NavRoutes.LEADER_GRAPH) { inclusive = true }
                     }
                 },
+            )
+        }
+        composable(NavRoutes.LEADER_ADD_PRODUCT) {
+            LeaderProductEntryRoute(
+                onBack = { navController.popBackStack() },
             )
         }
     }

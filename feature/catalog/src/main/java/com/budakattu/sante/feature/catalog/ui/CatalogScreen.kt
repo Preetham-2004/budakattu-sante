@@ -1,6 +1,5 @@
 package com.budakattu.sante.feature.catalog.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,21 +25,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
+import com.budakattu.sante.core.ui.components.BuyerRouteStrip
 import com.budakattu.sante.core.ui.components.ForestCard
+import com.budakattu.sante.core.ui.components.HeritageScaffold
 import com.budakattu.sante.core.ui.components.MspBadge
-import com.budakattu.sante.core.ui.theme.ForestPrimary
-import com.budakattu.sante.core.ui.theme.Parchment
+import com.budakattu.sante.core.ui.components.RouteBadge
 import com.budakattu.sante.feature.catalog.viewmodel.ProductListViewModel
 
 @Composable
 fun CatalogRoute(
     onOpenProduct: (String) -> Unit,
+    onOpenRoute: (String) -> Unit,
     viewModel: ProductListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -58,6 +59,7 @@ fun CatalogRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onProductClick = viewModel::onProductClick,
+        onOpenRoute = onOpenRoute,
     )
 }
 
@@ -66,42 +68,52 @@ fun CatalogScreen(
     uiState: ProductListUiState,
     snackbarHostState: SnackbarHostState,
     onProductClick: (String) -> Unit,
+    onOpenRoute: (String) -> Unit,
 ) {
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        containerColor = Parchment,
+    HeritageScaffold(
+        title = "Forest Market Command",
+        subtitle = "Seasonal tribal produce, fair pricing, and traceable stories presented with stronger marketplace presence.",
     ) { innerPadding ->
-        when (uiState) {
-            ProductListUiState.Loading -> LoadingState(innerPadding)
-            ProductListUiState.Offline -> OfflineState(innerPadding)
-            is ProductListUiState.Error -> ErrorState(innerPadding, uiState.message)
-            is ProductListUiState.Success -> ProductList(
-                products = uiState.products,
-                isOffline = uiState.isOffline,
-                innerPadding = innerPadding,
-                onProductClick = onProductClick,
-            )
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        ) { contentPadding ->
+            when (uiState) {
+                ProductListUiState.Loading -> LoadingState(innerPadding, contentPadding)
+                ProductListUiState.Offline -> OfflineState(innerPadding, contentPadding)
+                is ProductListUiState.Error -> ErrorState(innerPadding, contentPadding, uiState.message)
+                is ProductListUiState.Success -> ProductList(
+                    products = uiState.products,
+                    isOffline = uiState.isOffline,
+                    outerPadding = innerPadding,
+                    innerPadding = contentPadding,
+                    onProductClick = onProductClick,
+                    onOpenRoute = onOpenRoute,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun LoadingState(innerPadding: PaddingValues) {
+private fun LoadingState(outerPadding: PaddingValues, innerPadding: PaddingValues) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator(color = ForestPrimary)
+        CircularProgressIndicator()
     }
 }
 
 @Composable
-private fun OfflineState(innerPadding: PaddingValues) {
+private fun OfflineState(outerPadding: PaddingValues, innerPadding: PaddingValues) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
@@ -110,10 +122,11 @@ private fun OfflineState(innerPadding: PaddingValues) {
 }
 
 @Composable
-private fun ErrorState(innerPadding: PaddingValues, message: String) {
+private fun ErrorState(outerPadding: PaddingValues, innerPadding: PaddingValues, message: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(outerPadding)
             .padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
@@ -125,33 +138,46 @@ private fun ErrorState(innerPadding: PaddingValues, message: String) {
 private fun ProductList(
     products: List<ProductUiModel>,
     isOffline: Boolean,
+    outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onProductClick: (String) -> Unit,
+    onOpenRoute: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Parchment)
+            .padding(outerPadding)
             .padding(innerPadding),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {
-            Column {
-                Text(
-                    text = "Budakattu-Sante",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = ForestPrimary,
-                )
-                Spacer(modifier = Modifier.height(6.dp))
+            BuyerRouteStrip(
+                activeRoute = "catalog",
+                onNavigate = onOpenRoute,
+                marketRoute = "catalog",
+                heritageRoute = "heritage",
+                ordersRoute = "orders",
+                profileRoute = "profile",
+            )
+        }
+
+        item {
+            ForestCard {
+                Text("Trading circle", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = if (isOffline) {
-                        "Showing cached catalog while the device is offline."
+                        "Showing the locally available catalog while the forest route is offline."
                     } else {
-                        "Forest products sourced through tribal cooperatives."
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
+                        "Move between market, heritage, orders, and profile from one commanding surface."
+                    }
                 )
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    RouteBadge(label = "Products", value = products.size.toString())
+                    RouteBadge(label = "Mode", value = if (isOffline) "Offline" else "Live")
+                }
             }
         }
 
@@ -160,11 +186,12 @@ private fun ProductList(
                 modifier = Modifier.clickable { onProductClick(product.id) },
             ) {
                 AsyncImage(
-                    model = "https://images.unsplash.com/photo-1471943311424-646960669fbc?w=900",
+                    model = product.imageUrl,
                     contentDescription = product.name,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(160.dp),
+                    contentScale = ContentScale.Crop,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
@@ -185,8 +212,16 @@ private fun ProductList(
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = product.description, style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    RouteBadge(label = "Mode", value = product.availabilityLabel)
+                    RouteBadge(label = "Action", value = product.ctaLabel)
+                }
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(text = product.priceLabel, style = MaterialTheme.typography.titleLarge)
                 Text(text = product.stockLabel, style = MaterialTheme.typography.bodyLarge)
+                product.expectedDispatchLabel?.let { dispatch ->
+                    Text(text = dispatch, style = MaterialTheme.typography.bodyLarge)
+                }
                 Text(
                     text = "Harvested by ${product.familyName}, ${product.village}",
                     style = MaterialTheme.typography.bodyLarge,

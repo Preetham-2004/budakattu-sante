@@ -48,6 +48,12 @@ class FirestoreProductRepository @Inject constructor(
         awaitClose { listener.remove() }
     }
 
+    override suspend fun upsertProduct(product: Product) {
+        awaitTask {
+            collection.document(product.productId).set(product.toFirestoreDocument())
+        }
+    }
+
     override suspend fun seedProductsIfEmpty() {
         val snapshot = awaitTask { collection.get() }
         if (!snapshot.isEmpty) {

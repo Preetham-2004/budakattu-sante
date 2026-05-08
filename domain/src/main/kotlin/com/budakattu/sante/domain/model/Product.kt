@@ -1,11 +1,39 @@
 package com.budakattu.sante.domain.model
 
+enum class ProductAvailability {
+    IN_STOCK,
+    PREBOOK_OPEN,
+    COMING_SOON,
+    SOLD_OUT,
+}
+
+data class ProductDraft(
+    val name: String,
+    val categoryId: String,
+    val categoryName: String,
+    val description: String,
+    val audioDescription: String,
+    val familyName: String,
+    val village: String,
+    val pricePerUnit: Float,
+    val mspPerUnit: Float,
+    val unit: String,
+    val stockQty: Int,
+    val season: String?,
+    val imageUrls: List<String>,
+    val availability: ProductAvailability,
+    val isPrebookEnabled: Boolean,
+    val expectedDispatchDate: String?,
+    val maxPrebookQuantity: Int,
+)
+
 data class Product(
     val productId: String,
     val familyId: String,
     val categoryId: String,
     val name: String,
     val description: String,
+    val audioDescription: String,
     val categoryName: String,
     val familyName: String,
     val village: String,
@@ -16,6 +44,11 @@ data class Product(
     val isSeasonal: Boolean,
     val season: String?,
     val imageUrls: List<String>,
+    val availability: ProductAvailability,
+    val isPrebookEnabled: Boolean,
+    val expectedDispatchDate: String?,
+    val maxPrebookQuantity: Int,
+    val currentPrebookCount: Int,
     val isAvailable: Boolean,
     val addedAt: Long,
     val lastModifiedAt: Long,

@@ -21,6 +21,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:catalog"))
     implementation(project(":feature:leader"))
