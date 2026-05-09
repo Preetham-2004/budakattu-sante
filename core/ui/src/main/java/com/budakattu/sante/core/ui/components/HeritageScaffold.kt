@@ -1,13 +1,17 @@
 package com.budakattu.sante.core.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,16 +23,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.budakattu.sante.core.ui.theme.AmberHarvest
+import androidx.compose.ui.unit.sp
 import com.budakattu.sante.core.ui.theme.BarkBrown
 import com.budakattu.sante.core.ui.theme.CharcoalInk
+import com.budakattu.sante.core.ui.theme.ForestPrimary
+import com.budakattu.sante.core.ui.theme.ForestBackground
+import com.budakattu.sante.core.ui.theme.GoldLustre
 import com.budakattu.sante.core.ui.theme.LeafAccent
 import com.budakattu.sante.core.ui.theme.MilletGold
 import com.budakattu.sante.core.ui.theme.Parchment
+import com.budakattu.sante.core.ui.theme.SunsetClay
 
 @Composable
 fun HeritageScaffold(
@@ -39,122 +50,103 @@ fun HeritageScaffold(
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = Parchment,
+        containerColor = ForestBackground,
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Parchment, MilletGold.copy(alpha = 0.18f), Parchment),
-                    ),
-                ),
+                .background(ForestBackground),
         ) {
-            DecorativePattern()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
             ) {
                 Surface(
-                    color = BarkBrown.copy(alpha = 0.92f),
-                    shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                    tonalElevation = 10.dp,
+                    color = ForestPrimary,
+                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                    shadowElevation = 10.dp
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 22.dp),
+                            .padding(horizontal = 24.dp, vertical = 26.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             RouteBead(LeafAccent)
-                            RouteBead(MilletGold)
-                            RouteBead(AmberHarvest)
                             Text(
                                 text = "BUDAKATTU SANTE",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = Parchment,
+                                color = Color.White.copy(alpha = 0.7f),
                                 fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
                             )
                         }
+                        
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = Parchment,
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = Color.White,
+                            fontWeight = FontWeight.Black
                         )
+                        
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Parchment.copy(alpha = 0.88f),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.8f),
+                            lineHeight = 20.sp
                         )
                     }
                 }
-                content(PaddingValues(horizontal = 18.dp, vertical = 18.dp))
+                content(PaddingValues(16.dp))
             }
         }
     }
 }
 
 @Composable
-fun RouteBadge(label: String, value: String) {
+fun RouteBadge(
+    label: String, 
+    value: String,
+    modifier: Modifier = Modifier,
+    color: Color = ForestPrimary
+) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = BarkBrown.copy(alpha = 0.08f),
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = label.uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                color = BarkBrown,
+                style = MaterialTheme.typography.labelSmall,
+                color = CharcoalInk.copy(alpha = 0.5f),
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
-                color = CharcoalInk,
+                style = MaterialTheme.typography.titleMedium,
+                color = color,
+                fontWeight = FontWeight.Black
             )
         }
     }
 }
 
 @Composable
-private fun DecorativePattern() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 128.dp, start = 18.dp, end = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        repeat(3) { index ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                repeat(10) { bead ->
-                    val alpha = if ((index + bead) % 2 == 0) 0.16f else 0.08f
-                    Box(
-                        modifier = Modifier
-                            .size(if (bead % 3 == 0) 10.dp else 6.dp)
-                            .clip(CircleShape)
-                            .background(BarkBrown.copy(alpha = alpha)),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RouteBead(color: androidx.compose.ui.graphics.Color) {
+private fun RouteBead(color: Color) {
     Box(
         modifier = Modifier
-            .size(10.dp)
+            .size(8.dp)
             .clip(CircleShape)
             .background(color),
     )

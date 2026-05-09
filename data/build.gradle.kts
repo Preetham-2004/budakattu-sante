@@ -11,6 +11,11 @@ android {
     defaultConfig {
         minSdk = 24
         consumerProguardFiles("consumer-rules.pro")
+        buildConfigField("String", "GEMINI_API_KEY", "\"YOUR_GEMINI_API_KEY_HERE\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {

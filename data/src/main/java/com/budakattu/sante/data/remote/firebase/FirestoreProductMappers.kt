@@ -6,6 +6,13 @@ import com.google.firebase.firestore.DocumentSnapshot
 
 fun DocumentSnapshot.toProductDomain(): Product? {
     val document = toObject(ProductDocument::class.java) ?: return null
+    
+    // Manually handle alternate field names if the automatic mapping missed them
+    val seasonal = document.isSeasonal || getBoolean("seasonal") ?: false
+    val prebookEnabled = document.isPrebookEnabled || getBoolean("prebookEnabled") ?: false
+    val available = document.isAvailable && (getBoolean("available") ?: true)
+    val stock = if (document.availableStock > 0) document.availableStock else getLong("stockQty") ?: document.availableStock
+
     return Product(
         productId = document.productId.ifBlank { id },
         familyId = document.familyId,
@@ -19,17 +26,17 @@ fun DocumentSnapshot.toProductDomain(): Product? {
         pricePerUnit = document.pricePerUnit.toFloat(),
         mspPerUnit = document.mspPerUnit.toFloat(),
         unit = document.unit,
-        availableStock = document.availableStock.toInt(),
+        availableStock = stock.toInt(),
         reservedStock = document.reservedStock.toInt(),
         soldStock = document.soldStock.toInt(),
         preorderLimit = document.preorderLimit.toInt(),
-        isSeasonal = document.isSeasonal,
+        isSeasonal = seasonal,
         season = document.season,
         imageUrls = document.imageUrls,
         availability = document.availability.toAvailability(),
-        isPrebookEnabled = document.isPrebookEnabled,
+        isPrebookEnabled = prebookEnabled,
         expectedDispatchDate = document.expectedDispatchDate,
-        isAvailable = document.isAvailable,
+        isAvailable = available,
         addedAt = document.addedAt,
         lastModifiedAt = document.lastModifiedAt,
     )

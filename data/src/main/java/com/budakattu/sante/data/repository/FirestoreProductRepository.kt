@@ -54,6 +54,12 @@ class FirestoreProductRepository @Inject constructor(
         }
     }
 
+    override suspend fun deleteProduct(productId: String) {
+        awaitTask {
+            collection.document(productId).delete()
+        }
+    }
+
     override suspend fun seedProductsIfEmpty() {
         val snapshot = awaitTask { collection.get() }
         if (!snapshot.isEmpty) {

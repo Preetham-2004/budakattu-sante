@@ -1,44 +1,37 @@
 package com.budakattu.sante.feature.productdetail
 
 import android.speech.tts.TextToSpeech
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
+import com.budakattu.sante.core.ui.components.HighlightCard
 import com.budakattu.sante.core.ui.components.MspBadge
 import com.budakattu.sante.core.ui.components.RouteBadge
+import com.budakattu.sante.core.ui.theme.*
 import java.util.Locale
 
 @Composable
@@ -93,11 +86,11 @@ fun ProductDetailScreen(
     onPreorderClick: (Int) -> Unit,
 ) {
     HeritageScaffold(
-        title = "Product Chronicle",
-        subtitle = "Each batch carries price discipline, family traceability, and a story rooted in the forest belt.",
+        title = "Product Detail",
+        subtitle = "Forest harvest with traceability and fair-price commitment.",
     ) { outerPadding ->
         Scaffold(
-            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            containerColor = Color.Transparent,
             snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { innerPadding ->
             when (uiState) {
@@ -118,27 +111,19 @@ fun ProductDetailScreen(
 
 @Composable
 private fun Loading(outerPadding: PaddingValues, innerPadding: PaddingValues) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Box(
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
+        contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(color = ForestPrimary)
     }
 }
 
 @Composable
 private fun CenterText(outerPadding: PaddingValues, innerPadding: PaddingValues, text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Box(
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
+        contentAlignment = Alignment.Center,
     ) {
         Text(text)
     }
@@ -155,107 +140,122 @@ private fun DetailContent(
 ) {
     val product = state.product
     var quantity by remember(product.id) { mutableIntStateOf(1) }
+    
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(outerPadding)
             .padding(innerPadding),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            AsyncImage(
-                model = product.imageUrls.firstOrNull(),
-                contentDescription = product.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp),
-                contentScale = ContentScale.Crop,
-            )
-        }
-        item {
-            ForestCard {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    RouteBadge(label = "Mode", value = product.availabilityLabel)
-                    RouteBadge(label = "MSP", value = if (product.isMspSafe) "Protected" else "Below")
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(product.name, style = MaterialTheme.typography.headlineMedium)
-                        Text(product.categoryName, style = MaterialTheme.typography.labelLarge)
+            Surface(
+                shape = RoundedCornerShape(32.dp),
+                color = Color.White,
+                shadowElevation = 4.dp
+            ) {
+                Box {
+                    AsyncImage(
+                        model = product.imageUrls.firstOrNull(),
+                        contentDescription = product.name,
+                        modifier = Modifier.fillMaxWidth().height(300.dp),
+                        contentScale = ContentScale.Crop,
+                    )
+                    IconButton(
+                        onClick = onAudioDescriptionClick,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.9f))
+                    ) {
+                        Icon(Icons.Default.VolumeUp, contentDescription = null, tint = ForestPrimary)
                     }
+                }
+            }
+        }
+        
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = product.name,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = ForestPrimary
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = product.priceLabel,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = SunsetClay
+                    )
                     MspBadge(isSafe = product.isMspSafe)
                 }
-                Text(product.description, modifier = Modifier.padding(top = 12.dp))
-                Text(product.priceLabel, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 12.dp))
-                Text(product.mspLabel)
-                Text(product.stockLabel, modifier = Modifier.padding(top = 8.dp))
-                product.expectedDispatchLabel?.let {
-                    Text(it, modifier = Modifier.padding(top = 4.dp))
-                }
-                if (state.isOffline) {
-                    Text("Viewing cached product details offline.", modifier = Modifier.padding(top = 8.dp))
-                }
             }
         }
+
+        item {
+            HighlightCard {
+                Text("Origin Story", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = product.description, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Village: ${product.village}", style = MaterialTheme.typography.labelLarge)
+                Text("Harvested by ${product.familyTitle}", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+
         item {
             ForestCard {
-                Text("Traceability", style = MaterialTheme.typography.titleLarge)
-                Text(product.traceabilityLabel, modifier = Modifier.padding(top = 8.dp))
-                Text("Harvested by ${product.familyTitle}", modifier = Modifier.padding(top = 8.dp))
-                Text("Village: ${product.village}")
-                Text("Season: ${product.harvestWindow}")
-            }
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(modifier = Modifier.weight(1f), onClick = onAudioDescriptionClick) {
-                    Text("Hear audio")
-                }
-                Button(modifier = Modifier.weight(1f), onClick = { onAddToCart(quantity) }) {
-                    Text("Add to cart")
-                }
-            }
-        }
-        item {
-            ForestCard {
-                Text("Order quantity", style = MaterialTheme.typography.titleLarge)
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = { if (quantity > 1) quantity -= 1 }) { Text("-") }
-                    Text(quantity.toString(), style = MaterialTheme.typography.headlineSmall)
-                    Button(onClick = { quantity += 1 }) { Text("+") }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("unit(s)")
+                    Text("Quantity", style = MaterialTheme.typography.titleMedium)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { if (quantity > 1) quantity -= 1 },
+                            modifier = Modifier.size(36.dp).background(ForestBackground, CircleShape)
+                        ) { Icon(Icons.Default.Remove, contentDescription = null) }
+                        Text(
+                            text = quantity.toString(),
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        IconButton(
+                            onClick = { quantity += 1 },
+                            modifier = Modifier.size(36.dp).background(ForestBackground, CircleShape)
+                        ) { Icon(Icons.Default.Add, contentDescription = null) }
+                    }
                 }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
                 Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
                     onClick = { onPreorderClick(quantity) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary)
                 ) {
-                    Text(product.ctaLabel)
+                    Text(product.ctaLabel.uppercase(), fontWeight = FontWeight.Bold)
                 }
-            }
-        }
-        item {
-            Text("Related products", style = MaterialTheme.typography.titleLarge)
-        }
-        items(state.relatedProducts, key = { it.id }) { related ->
-            ForestCard {
-                Text(related.title, style = MaterialTheme.typography.titleLarge)
-                Text(related.subtitle)
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedButton(
+                    onClick = { onAddToCart(quantity) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(2.dp, ForestPrimary)
+                ) {
+                    Text("ADD TO CART", color = ForestPrimary, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

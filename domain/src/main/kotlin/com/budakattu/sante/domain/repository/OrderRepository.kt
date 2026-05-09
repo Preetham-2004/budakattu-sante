@@ -12,6 +12,7 @@ interface OrderRepository {
     suspend fun updateCartItemQuantity(userId: String, itemId: String, quantity: Int)
     suspend fun removeCartItem(userId: String, itemId: String)
     suspend fun checkout(userId: String): CheckoutResult
+    suspend fun checkoutSingleItem(userId: String, productId: String, quantity: Int): CheckoutResult
     fun observeBuyerOrders(userId: String): Flow<List<Order>>
     fun observeOrder(orderId: String): Flow<Order?>
     fun observeLeaderOrders(cooperativeId: String): Flow<List<Order>>

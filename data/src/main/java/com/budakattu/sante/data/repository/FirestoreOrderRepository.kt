@@ -488,6 +488,95 @@ class FirestoreOrderRepository @Inject constructor(
         validateCartQuantity(product, quantity)
     }
 
+    override suspend fun checkoutSingleItem(userId: String, productId: String, quantity: Int): com.budakattu.sante.domain.model.CheckoutResult {
+        require(quantity > 0) { "Quantity must be at least 1" }
+        val productRef = products.document(productId)
+        return awaitTask {
+            firestore.runTransaction { transaction ->
+                val product = transaction.get(productRef)
+                    .toObject(com.budakattu.sante.data.remote.firebase.ProductDocument::class.java)
+                    ?: throw IllegalStateException("Product not found")
+                validateCheckoutQuantity(product, quantity)
+
+                val now = System.currentTimeMillis()
+                val orderId = orders.document().id
+                val availability = product.availability.toAvailability()
+                val orderType = if (availability == com.budakattu.sante.domain.model.ProductAvailability.IN_STOCK) {
+                    com.budakattu.sante.domain.model.OrderType.READY
+                } else {
+                    com.budakattu.sante.domain.model.OrderType.PREBOOK
+                }
+                val status = if (availability == com.budakattu.sante.domain.model.ProductAvailability.IN_STOCK) {
+                    com.budakattu.sante.domain.model.OrderStatus.CONFIRMED
+                } else {
+                    com.budakattu.sante.domain.model.OrderStatus.RESERVED
+                }
+
+                when (availability) {
+                    com.budakattu.sante.domain.model.ProductAvailability.IN_STOCK -> {
+                        transaction.update(
+                            productRef,
+                            mapOf(
+                                "availableStock" to (product.availableStock - quantity),
+                                "soldStock" to (product.soldStock + quantity),
+                                "lastModifiedAt" to now,
+                            ),
+                        )
+                    }
+
+                    com.budakattu.sante.domain.model.ProductAvailability.PREBOOK_OPEN,
+                    com.budakattu.sante.domain.model.ProductAvailability.COMING_SOON,
+                    -> {
+                        transaction.update(
+                            productRef,
+                            mapOf(
+                                "reservedStock" to (product.reservedStock + quantity),
+                                "lastModifiedAt" to now,
+                            ),
+                        )
+                    }
+
+                    com.budakattu.sante.domain.model.ProductAvailability.SOLD_OUT -> throw IllegalStateException("${product.name} is sold out")
+                }
+
+                val orderRef = orders.document(orderId)
+                transaction.set(
+                    orderRef,
+                    com.budakattu.sante.data.remote.firebase.OrderDocument(
+                        orderId = orderId,
+                        userId = userId,
+                        cooperativeId = FirestorePaths.DEFAULT_COOPERATIVE_ID,
+                        status = status.name,
+                        orderType = orderType.name,
+                        totalItems = quantity.toLong(),
+                        totalAmount = quantity * product.pricePerUnit,
+                        createdAt = now,
+                        updatedAt = now,
+                        expectedDispatchDate = product.expectedDispatchDate,
+                    ),
+                )
+                transaction.set(
+                    orderRef.collection(FirestorePaths.ORDER_ITEMS).document(productId),
+                    com.budakattu.sante.data.remote.firebase.OrderItemDocument(
+                        itemId = productId,
+                        productId = productId,
+                        productName = product.name,
+                        quantity = quantity.toLong(),
+                        pricePerUnit = product.pricePerUnit,
+                        unit = product.unit,
+                        imageUrl = product.imageUrls.firstOrNull(),
+                        familyName = product.familyName,
+                        village = product.village,
+                        availability = product.availability,
+                        expectedDispatchDate = product.expectedDispatchDate,
+                    ),
+                )
+
+                com.budakattu.sante.domain.model.CheckoutResult(orderId = orderId, status = status, orderType = orderType)
+            }
+        }
+    }
+
     private suspend fun <T> awaitTask(block: () -> com.google.android.gms.tasks.Task<T>): T {
         return suspendCancellableCoroutine { continuation ->
             block()

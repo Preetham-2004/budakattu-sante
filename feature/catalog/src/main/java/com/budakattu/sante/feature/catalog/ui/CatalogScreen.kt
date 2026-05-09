@@ -1,30 +1,20 @@
 package com.budakattu.sante.feature.catalog.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +26,10 @@ import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
 import com.budakattu.sante.core.ui.components.MspBadge
 import com.budakattu.sante.core.ui.components.RouteBadge
+import com.budakattu.sante.core.ui.theme.BarkBrown
+import com.budakattu.sante.core.ui.theme.ForestPrimary
+import com.budakattu.sante.core.ui.theme.ForestBackground
+import com.budakattu.sante.core.ui.theme.SunsetClay
 import com.budakattu.sante.feature.catalog.viewmodel.ProductListViewModel
 
 @Composable
@@ -71,18 +65,18 @@ fun CatalogScreen(
     onOpenRoute: (String) -> Unit,
 ) {
     HeritageScaffold(
-        title = "Forest Market Command",
-        subtitle = "Seasonal tribal produce, fair pricing, and traceable stories presented with stronger marketplace presence.",
+        title = "Marketplace",
+        subtitle = "Authentic tribal harvest directly from the forest.",
     ) { innerPadding ->
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            containerColor = Color.Transparent,
         ) { contentPadding ->
             when (uiState) {
                 ProductListUiState.Loading -> LoadingState(innerPadding, contentPadding)
                 ProductListUiState.Offline -> OfflineState(innerPadding, contentPadding)
                 is ProductListUiState.Error -> ErrorState(innerPadding, contentPadding, uiState.message)
-                is ProductListUiState.Success -> ProductList(
+                is ProductListUiState.Success -> ProductGrid(
                     products = uiState.products,
                     isOffline = uiState.isOffline,
                     outerPadding = innerPadding,
@@ -98,36 +92,27 @@ fun CatalogScreen(
 @Composable
 private fun LoadingState(outerPadding: PaddingValues, innerPadding: PaddingValues) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(color = ForestPrimary)
     }
 }
 
 @Composable
 private fun OfflineState(outerPadding: PaddingValues, innerPadding: PaddingValues) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
-        Text("Offline and no cached catalog yet.")
+        Text("Offline. Please check your connection.")
     }
 }
 
 @Composable
 private fun ErrorState(outerPadding: PaddingValues, innerPadding: PaddingValues, message: String) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(message)
@@ -135,7 +120,7 @@ private fun ErrorState(outerPadding: PaddingValues, innerPadding: PaddingValues,
 }
 
 @Composable
-private fun ProductList(
+private fun ProductGrid(
     products: List<ProductUiModel>,
     isOffline: Boolean,
     outerPadding: PaddingValues,
@@ -143,15 +128,14 @@ private fun ProductList(
     onProductClick: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(outerPadding)
-            .padding(innerPadding),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize().padding(outerPadding).padding(innerPadding),
+        contentPadding = PaddingValues(bottom = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
+        item(span = { GridItemSpan(2) }) {
             BuyerRouteStrip(
                 activeRoute = "catalog",
                 onNavigate = onOpenRoute,
@@ -162,72 +146,103 @@ private fun ProductList(
             )
         }
 
-        item {
-            ForestCard {
-                Text("Trading circle", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (isOffline) {
-                        "Showing the locally available catalog while the forest route is offline."
-                    } else {
-                        "Move between market, heritage, orders, and profile from one commanding surface."
-                    }
-                )
-                Spacer(modifier = Modifier.height(14.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    RouteBadge(label = "Products", value = products.size.toString())
-                    RouteBadge(label = "Mode", value = if (isOffline) "Offline" else "Live")
-                }
-            }
+        item(span = { GridItemSpan(2) }) {
+            SearchBar()
         }
 
         items(items = products, key = { it.id }) { product ->
-            ForestCard(
-                modifier = Modifier.clickable { onProductClick(product.id) },
-            ) {
+            ProductGridItem(product = product, onClick = { onProductClick(product.id) })
+        }
+    }
+}
+
+@Composable
+private fun SearchBar() {
+    Surface(
+        modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Search forest products...", color = Color.Gray, modifier = Modifier.weight(1f))
+            Icon(Icons.Default.Tune, contentDescription = null, tint = ForestPrimary)
+        }
+    }
+}
+
+@Composable
+private fun ProductGridItem(
+    product: ProductUiModel,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White,
+        shadowElevation = 2.dp
+    ) {
+        Column {
+            Box {
                 AsyncImage(
                     model = product.imageUrl,
                     contentDescription = product.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp),
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1.1f).clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                     contentScale = ContentScale.Crop,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                if (product.ctaLabel == "Pre-book") {
+                    Surface(
+                        color = SunsetClay,
+                        shape = RoundedCornerShape(bottomEnd = 12.dp),
+                        modifier = Modifier.align(Alignment.TopStart)
+                    ) {
+                        Text(
+                            text = "PRE-BOOK",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Box(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                    MspBadge(isSafe = product.isMspSafe)
+                }
+            }
+            
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = product.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = product.categoryName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = product.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(text = product.categoryName, style = MaterialTheme.typography.labelLarge)
-                    }
-                    MspBadge(isSafe = product.isMspSafe)
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = product.description, style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                    RouteBadge(label = "Mode", value = product.availabilityLabel)
-                    RouteBadge(label = "Action", value = product.ctaLabel)
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = product.priceLabel, style = MaterialTheme.typography.titleLarge)
-                Text(text = product.stockLabel, style = MaterialTheme.typography.bodyLarge)
-                product.expectedDispatchLabel?.let { dispatch ->
-                    Text(text = dispatch, style = MaterialTheme.typography.bodyLarge)
-                }
-                Text(
-                    text = "Harvested by ${product.familyName}, ${product.village}",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                product.seasonLabel?.let { season ->
-                    Text(text = "Season: $season", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = product.priceLabel.substringBefore("/"),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ForestPrimary,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        text = "/" + product.priceLabel.substringAfter("/"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
                 }
             }
         }

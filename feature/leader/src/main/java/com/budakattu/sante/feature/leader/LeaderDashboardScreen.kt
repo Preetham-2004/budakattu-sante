@@ -1,31 +1,26 @@
 package com.budakattu.sante.feature.leader
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
+import com.budakattu.sante.core.ui.components.HighlightCard
 import com.budakattu.sante.core.ui.components.RouteBadge
-import com.budakattu.sante.core.ui.theme.BarkBrown
-import com.budakattu.sante.core.ui.theme.CharcoalInk
+import com.budakattu.sante.core.ui.theme.*
 
 @Composable
 fun LeaderDashboardScreen(
@@ -37,156 +32,110 @@ fun LeaderDashboardScreen(
     onSignOut: () -> Unit,
 ) {
     HeritageScaffold(
-        title = "Cooperative Command",
-        subtitle = "Track inventory, supply movement, and fair-price alerts from one clear dashboard.",
+        title = "Command",
+        subtitle = "Overseeing the marketplace with roots and discipline.",
     ) { innerPadding: PaddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            ForestCard {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text("Leader Dashboard", style = MaterialTheme.typography.headlineMedium)
-                            Text(
-                                "A simple command view for your cooperative activity and profile details.",
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Button(
-                            onClick = onSignOut,
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = BarkBrown),
-                        ) {
-                            Text("Logout")
-                        }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "Hello, $leaderName", style = MaterialTheme.typography.headlineMedium)
+                        Text(text = leaderRoleLabel, color = ForestMedium)
                     }
-                    Surface(
-                        tonalElevation = 0.dp,
-                        color = BarkBrown.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(18.dp),
+                    IconButton(
+                        onClick = onSignOut,
+                        modifier = Modifier.clip(CircleShape).background(Color.White)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    "Profile",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = CharcoalInk,
-                                )
-                                OutlinedButton(
-                                    onClick = {},
-                                    shape = RoundedCornerShape(14.dp),
-                                ) {
-                                    Text("View data")
-                                }
-                            }
-                            HorizontalDivider(color = BarkBrown.copy(alpha = 0.15f))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                ProfileInfoBlock(
-                                    modifier = Modifier.weight(1f),
-                                    label = "Name",
-                                    value = leaderName,
-                                )
-                                ProfileInfoBlock(
-                                    modifier = Modifier.weight(1f),
-                                    label = "Role",
-                                    value = leaderRoleLabel,
-                                )
-                            }
-                            ProfileInfoBlock(
-                                modifier = Modifier.fillMaxWidth(),
-                                label = "User ID",
-                                value = leaderId,
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Button(
-                            modifier = Modifier.weight(1f),
-                            onClick = onAddProduct,
-                            shape = RoundedCornerShape(14.dp),
-                        ) {
-                            Text("Add product")
-                        }
-                        OutlinedButton(
-                            modifier = Modifier.weight(1f),
-                            onClick = onOpenOrders,
-                            shape = RoundedCornerShape(14.dp),
-                        ) {
-                            Text("Pending orders")
-                        }
+                        Icon(Icons.Default.Logout, contentDescription = "Logout", tint = ForestPrimary)
                     }
                 }
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                RouteBadge(label = "Pending", value = "07")
-                RouteBadge(label = "MSP", value = "02 Alerts")
+
+            item {
+                HighlightCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        RouteBadge(label = "Orders", value = "07", modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        RouteBadge(label = "Alerts", value = "02", color = SunsetClay, modifier = Modifier.weight(1f))
+                    }
+                }
             }
-            ForestCard {
-                Text("Today's focus", style = MaterialTheme.typography.titleLarge)
-                Text(
-                    "Pending sync records, MSP warnings, and incoming preorders are grouped here for quick review.",
-                    style = MaterialTheme.typography.bodyMedium,
+
+            item {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    DashboardActionTile(
+                        title = "Add Product",
+                        icon = Icons.Default.Add,
+                        color = ForestPrimary,
+                        onClick = onAddProduct,
+                        modifier = Modifier.weight(1f)
+                    )
+                    DashboardActionTile(
+                        title = "Orders",
+                        icon = Icons.Default.ShoppingCart,
+                        color = ForestMedium,
+                        onClick = onOpenOrders,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            item {
+                DashboardActionTile(
+                    title = "Inventory",
+                    icon = Icons.Default.Inventory,
+                    color = DeepSlate,
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            ForestCard {
-                Text("Supply overview", style = MaterialTheme.typography.titleLarge)
-                Text(
-                    "Batch logging, seasonal intake, and cooperative summaries stay visible without crowding the screen.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+
+            item {
+                ForestCard {
+                    Text("Market Intelligence", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("The demand for Wild Honey is increasing. Ensure all families have their supply logs updated.")
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ProfileInfoBlock(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
+private fun DashboardActionTile(
+    title: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
+    Surface(
+        onClick = onClick,
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White,
+        shadowElevation = 2.dp
     ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            color = BarkBrown,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            color = CharcoalInk,
-        )
+        Column(modifier = Modifier.padding(20.dp)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(32.dp).background(color.copy(alpha = 0.1f), CircleShape).padding(6.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
     }
 }
