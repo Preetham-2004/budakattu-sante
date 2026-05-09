@@ -40,6 +40,13 @@ class LeaderProductFormViewModel @Inject constructor(
     fun updateAvailability(value: ProductAvailability) = updateState { copy(availability = value, errorMessage = null) }
     fun updatePrebookEnabled(value: Boolean) = updateState { copy(isPrebookEnabled = value, errorMessage = null) }
 
+    // New visual-only fields for the refined UI
+    fun updateHarvestDate(value: String) = updateState { copy(harvestDate = value) }
+    fun updateExpiryDate(value: String) = updateState { copy(expiryDate = value) }
+    fun updateBatchNumber(value: String) = updateState { copy(batchNumber = value) }
+    fun updateIsVisible(value: Boolean) = updateState { copy(isVisible = value) }
+    fun updateNotifyBuyers(value: Boolean) = updateState { copy(notifyBuyers = value) }
+
     fun autofillAudioDescription() {
         val current = _uiState.value
         val generated = buildString {
@@ -75,7 +82,7 @@ class LeaderProductFormViewModel @Inject constructor(
                         pricePerUnit = current.price.toFloat(),
                         mspPerUnit = current.msp.toFloat(),
                         unit = current.unit.trim(),
-                        availableStock = current.quantity.toInt(),
+                        availableStock = current.quantity.toIntOrNull() ?: 0,
                         season = current.season.trim().takeIf { it.isNotBlank() },
                         imageUrls = listOfNotNull(current.imageUrl.trim().takeIf { it.isNotBlank() }),
                         availability = current.availability,
@@ -125,10 +132,10 @@ data class LeaderProductFormUiState(
     val quantity: String = "",
     val unit: String = "kg",
     val price: String = "",
-    val msp: String = "",
+    val msp: String = "250",
     val season: String = "",
-    val familyName: String = "",
-    val village: String = "",
+    val familyName: String = "Koliya Beta Family Group",
+    val village: String = "Agumbe, Shimoga, Karnataka",
     val imageUrl: String = "",
     val expectedDispatch: String = "",
     val prebookLimit: String = "",
@@ -136,4 +143,11 @@ data class LeaderProductFormUiState(
     val isPrebookEnabled: Boolean = false,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
+    
+    // Additional fields for visual fidelity
+    val harvestDate: String = "25 May 2026",
+    val expiryDate: String = "25 Nov 2026",
+    val batchNumber: String = "HB-2026-05-001",
+    val isVisible: Boolean = true,
+    val notifyBuyers: Boolean = false
 )
