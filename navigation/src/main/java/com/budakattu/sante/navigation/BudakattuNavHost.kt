@@ -19,7 +19,8 @@ import com.budakattu.sante.feature.auth.OnboardingScreen
 import com.budakattu.sante.feature.auth.SignupScreen
 import com.budakattu.sante.feature.auth.SplashRoute
 import com.budakattu.sante.feature.catalog.ui.CatalogRoute
-import com.budakattu.sante.feature.leader.LeaderDashboardScreen
+import com.budakattu.sante.feature.leader.LeaderDashboardRoute
+import com.budakattu.sante.feature.leader.LeaderInventoryRoute
 import com.budakattu.sante.feature.leader.LeaderProductEntryRoute
 import com.budakattu.sante.feature.orders.BuyerOrdersRoute
 import com.budakattu.sante.feature.orders.CartRoute
@@ -188,46 +189,46 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
     navigation(startDestination = NavRoutes.LEADER_HOME, route = NavRoutes.LEADER_GRAPH) {
         composable(NavRoutes.LEADER_HOME) {
             val authViewModel: AuthViewModel = hiltViewModel()
-            val sessionState by authViewModel.sessionState.collectAsState()
-            LeaderDashboardScreen(
-                leaderName = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
-                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).name
-                } else {
-                    "Leader"
-                },
-                leaderId = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
-                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).userId
-                } else {
-                    "--"
-                },
-                leaderRoleLabel = if (sessionState is com.budakattu.sante.domain.model.SessionState.LoggedIn) {
-                    (sessionState as com.budakattu.sante.domain.model.SessionState.LoggedIn).role
-                        .name
-                } else {
-                    "LEADER"
-                },
+            LeaderDashboardRoute(
                 onAddProduct = {
                     navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
                 },
                 onOpenOrders = {
                     navController.navigate(NavRoutes.LEADER_ORDERS)
                 },
+                onOpenInventory = {
+                    navController.navigate(NavRoutes.LEADER_INVENTORY)
+                },
+                onEditDraft = { productId ->
+                    // For now redirect to add product, or a specific edit route if exists
+                    navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
+                },
                 onSignOut = {
                     authViewModel.signOut()
                     navController.navigate(NavRoutes.AUTH_GRAPH) {
-                        popUpTo(NavRoutes.LEADER_GRAPH) { inclusive = true }
-                    }
+                        popUpTo(NavRoutes.LEADER_GRAPH) { inclusive = true } }
                 },
             )
         }
         composable(NavRoutes.LEADER_ADD_PRODUCT) {
             LeaderProductEntryRoute(
                 onBack = { navController.popBackStack() },
+                onSuccess = {
+                    navController.navigate(NavRoutes.BUYER_GRAPH) {
+                        popUpTo(NavRoutes.LEADER_HOME)
+                    }
+                }
             )
         }
         composable(NavRoutes.LEADER_ORDERS) {
             LeaderOrdersRoute(
                 onBack = { navController.popBackStack() },
+            )
+        }
+        composable(NavRoutes.LEADER_INVENTORY) {
+            LeaderInventoryRoute(
+                onBack = { navController.popBackStack() },
+                onAddProduct = { navController.navigate(NavRoutes.LEADER_ADD_PRODUCT) }
             )
         }
     }

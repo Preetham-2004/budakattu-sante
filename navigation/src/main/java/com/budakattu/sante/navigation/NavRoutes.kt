@@ -11,6 +11,7 @@ object NavRoutes {
     const val LEADER_HOME = "leader_home"
     const val LEADER_ADD_PRODUCT = "leader_add_product"
     const val LEADER_ORDERS = "leader_orders"
+    const val LEADER_INVENTORY = "leader_inventory"
     const val CATALOG = "catalog"
     const val HERITAGE = "heritage"
     const val ORDERS = "orders"

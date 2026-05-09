@@ -51,6 +51,7 @@ data class Product(
     val isPrebookEnabled: Boolean,
     val expectedDispatchDate: String?,
     val isAvailable: Boolean,
+    val isDraft: Boolean = false,
     val addedAt: Long,
     val lastModifiedAt: Long,
 )

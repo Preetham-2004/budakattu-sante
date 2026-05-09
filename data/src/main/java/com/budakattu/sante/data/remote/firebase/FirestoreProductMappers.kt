@@ -37,6 +37,7 @@ fun DocumentSnapshot.toProductDomain(): Product? {
         isPrebookEnabled = prebookEnabled,
         expectedDispatchDate = document.expectedDispatchDate,
         isAvailable = available,
+        isDraft = document.isDraft || getBoolean("draft") ?: false,
         addedAt = document.addedAt,
         lastModifiedAt = document.lastModifiedAt,
     )
@@ -66,6 +67,7 @@ fun Product.toFirestoreDocument(): ProductDocument = ProductDocument(
     isPrebookEnabled = isPrebookEnabled,
     expectedDispatchDate = expectedDispatchDate,
     isAvailable = isAvailable,
+    isDraft = isDraft,
     addedAt = addedAt,
     lastModifiedAt = lastModifiedAt,
 )

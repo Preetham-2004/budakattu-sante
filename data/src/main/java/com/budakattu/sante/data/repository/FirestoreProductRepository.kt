@@ -21,7 +21,7 @@ class FirestoreProductRepository @Inject constructor(
         .document(FirestorePaths.DEFAULT_COOPERATIVE_ID)
         .collection(FirestorePaths.PRODUCTS)
 
-    override fun getProducts(): Flow<List<Product>> = callbackFlow {
+    override fun getProducts(includeDrafts: Boolean): Flow<List<Product>> = callbackFlow {
         val listener = collection.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 trySend(emptyList())
@@ -30,6 +30,7 @@ class FirestoreProductRepository @Inject constructor(
 
             val products = snapshot?.documents
                 ?.mapNotNull { it.toProductDomain() }
+                ?.filter { includeDrafts || !it.isDraft }
                 ?.sortedByDescending { it.addedAt }
                 .orEmpty()
             trySend(products)

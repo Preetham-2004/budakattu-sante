@@ -10,7 +10,7 @@ import javax.inject.Inject
 class AddProductUseCase @Inject constructor(
     private val productRepository: ProductRepository,
 ) {
-    suspend operator fun invoke(draft: ProductDraft) {
+    suspend operator fun invoke(draft: ProductDraft, isDraft: Boolean = false) {
         val now = System.currentTimeMillis()
         val product = Product(
             productId = buildProductId(draft.name, now),
@@ -36,6 +36,7 @@ class AddProductUseCase @Inject constructor(
             isPrebookEnabled = draft.isPrebookEnabled,
             expectedDispatchDate = draft.expectedDispatchDate?.trim()?.takeIf { it.isNotBlank() },
             isAvailable = draft.availability != ProductAvailability.SOLD_OUT,
+            isDraft = isDraft,
             addedAt = now,
             lastModifiedAt = now,
         )

@@ -2,108 +2,99 @@ package com.budakattu.sante.core.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.budakattu.sante.core.ui.theme.BarkBrown
-import com.budakattu.sante.core.ui.theme.CharcoalInk
-import com.budakattu.sante.core.ui.theme.ForestPrimary
-import com.budakattu.sante.core.ui.theme.ForestBackground
-import com.budakattu.sante.core.ui.theme.GoldLustre
-import com.budakattu.sante.core.ui.theme.LeafAccent
-import com.budakattu.sante.core.ui.theme.MilletGold
-import com.budakattu.sante.core.ui.theme.Parchment
-import com.budakattu.sante.core.ui.theme.SunsetClay
+import coil.compose.AsyncImage
+import com.budakattu.sante.core.ui.theme.*
 
 @Composable
 fun HeritageScaffold(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    topBarContent: @Composable (ColumnScope.() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = ForestBackground,
+        containerColor = TraditionalBackground,
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ForestBackground),
+                .padding(innerPadding),
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp))
             ) {
-                Surface(
-                    color = ForestPrimary,
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
-                    shadowElevation = 10.dp
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 26.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            RouteBead(LeafAccent)
-                            Text(
-                                text = "BUDAKATTU SANTE",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color.White.copy(alpha = 0.7f),
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                // Forest Background Image Placeholder
+                AsyncImage(
+                    model = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560",
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                
+                // Dark Gradient Overlay for text readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                                startY = 100f
                             )
-                        }
-                        
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = Color.White,
-                            fontWeight = FontWeight.Black
                         )
-                        
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.8f),
-                            lineHeight = 20.sp
-                        )
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 24.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (topBarContent != null) {
+                        topBarContent()
                     }
                 }
-                content(PaddingValues(16.dp))
             }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = BarkBrown,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 32.sp
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = CharcoalInk.copy(alpha = 0.6f),
+                )
+            }
+            
+            content(PaddingValues(horizontal = 16.dp))
         }
     }
 }
@@ -113,13 +104,14 @@ fun RouteBadge(
     label: String, 
     value: String,
     modifier: Modifier = Modifier,
-    color: Color = ForestPrimary
+    color: Color = TraditionalPrimary
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
+        shape = RoundedCornerShape(12.dp),
+        color = TraditionalSurface,
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f)),
+        shadowElevation = 2.dp
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -130,7 +122,8 @@ fun RouteBadge(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = CharcoalInk.copy(alpha = 0.5f),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 9.sp
             )
             Text(
                 text = value,
@@ -140,14 +133,4 @@ fun RouteBadge(
             )
         }
     }
-}
-
-@Composable
-private fun RouteBead(color: Color) {
-    Box(
-        modifier = Modifier
-            .size(8.dp)
-            .clip(CircleShape)
-            .background(color),
-    )
 }

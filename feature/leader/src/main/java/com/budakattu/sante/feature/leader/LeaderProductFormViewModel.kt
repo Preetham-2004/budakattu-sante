@@ -47,6 +47,45 @@ class LeaderProductFormViewModel @Inject constructor(
     fun updateIsVisible(value: Boolean) = updateState { copy(isVisible = value) }
     fun updateNotifyBuyers(value: Boolean) = updateState { copy(notifyBuyers = value) }
 
+    fun saveDraft() {
+        val current = _uiState.value
+        viewModelScope.launch {
+            _uiState.value = current.copy(isSaving = true, errorMessage = null)
+            runCatching {
+                addProductUseCase(
+                    ProductDraft(
+                        name = current.name.trim(),
+                        categoryId = current.categoryName.trim().lowercase().replace(" ", "-"),
+                        categoryName = current.categoryName.trim(),
+                        description = current.description.trim(),
+                        audioDescription = current.audioDescription.trim(),
+                        familyName = current.familyName.trim(),
+                        village = current.village.trim(),
+                        pricePerUnit = current.price.toFloatOrNull() ?: 0f,
+                        mspPerUnit = current.msp.toFloatOrNull() ?: 0f,
+                        unit = current.unit.trim(),
+                        availableStock = current.quantity.toIntOrNull() ?: 0,
+                        season = current.season.trim().takeIf { it.isNotBlank() },
+                        imageUrls = listOfNotNull(current.imageUrl.trim().takeIf { it.isNotBlank() }),
+                        availability = current.availability,
+                        isPrebookEnabled = current.isPrebookEnabled,
+                        expectedDispatchDate = current.expectedDispatch.trim().takeIf { it.isNotBlank() },
+                        preorderLimit = current.prebookLimit.toIntOrNull() ?: 0,
+                    ),
+                    isDraft = true
+                )
+            }.onSuccess {
+                _uiState.value = current.copy(isSaving = false)
+                _events.emit("Draft saved successfully.")
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    errorMessage = error.localizedMessage ?: "Unable to save draft",
+                )
+            }
+        }
+    }
+
     fun autofillAudioDescription() {
         val current = _uiState.value
         val generated = buildString {

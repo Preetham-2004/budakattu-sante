@@ -27,6 +27,7 @@ data class ProductDocument(
     var isPrebookEnabled: Boolean = false,
     var expectedDispatchDate: String? = null,
     var isAvailable: Boolean = true,
+    var isDraft: Boolean = false,
     var addedAt: Long = 0L,
     var lastModifiedAt: Long = 0L,
 )
