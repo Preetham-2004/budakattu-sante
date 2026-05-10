@@ -8,6 +8,10 @@ import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.repository.OrderRepository
 import com.budakattu.sante.domain.repository.ProductRepository
 import com.budakattu.sante.domain.repository.SessionRepository
+import com.budakattu.sante.data.repository.FirestoreTraceabilityRepository
+import com.budakattu.sante.domain.repository.TraceabilityRepository
+import com.budakattu.sante.data.repository.MockPaymentGateway
+import com.budakattu.sante.domain.repository.PaymentGateway
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,6 +23,12 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
+    abstract fun bindPaymentGateway(
+        mockPaymentGateway: MockPaymentGateway,
+    ): PaymentGateway
+
+    @Binds
+    @Singleton
     abstract fun bindProductRepository(
         productRepositoryImpl: FirestoreProductRepository,
     ): ProductRepository
@@ -28,6 +38,12 @@ abstract class RepositoryModule {
     abstract fun bindOrderRepository(
         orderRepositoryImpl: FirestoreOrderRepository,
     ): OrderRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTraceabilityRepository(
+        traceabilityRepositoryImpl: FirestoreTraceabilityRepository,
+    ): TraceabilityRepository
 
     @Binds
     @Singleton

@@ -9,6 +9,7 @@ sealed interface SessionState {
         val userId: String,
         val name: String,
         val role: UserRole,
+        val profilePictureUrl: String? = null,
         val cooperativeId: String?,
         val onboardingCompleted: Boolean,
     ) : SessionState

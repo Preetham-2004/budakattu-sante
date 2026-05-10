@@ -77,6 +77,12 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.launch
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.PhotoCamera
+import coil.compose.AsyncImage
+
 @Composable
 fun SplashRoute(
     onNavigateToOnboarding: () -> Unit,
@@ -197,6 +203,7 @@ fun SignupScreen(
     SignupExperience(
         uiState = uiState,
         onNameChange = viewModel::updateName,
+        onProfilePictureUrlChange = viewModel::updateProfilePictureUrl,
         onEmailChange = viewModel::updateEmail,
         onPasswordChange = viewModel::updatePassword,
         onRoleChange = viewModel::updateRole,
@@ -551,6 +558,7 @@ private fun LoginExperience(
 private fun SignupExperience(
     uiState: AuthUiState,
     onNameChange: (String) -> Unit,
+    onProfilePictureUrlChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onRoleChange: (UserRole) -> Unit,
@@ -636,6 +644,13 @@ private fun SignupExperience(
                         },
                     )
 
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ProfileImagePicker(
+                        imageUrl = uiState.profilePictureUrl,
+                        onImageSelected = onProfilePictureUrlChange
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     LoginFieldLabel("Email or Phone")
                     OutlinedTextField(
                         value = uiState.email,
@@ -709,6 +724,54 @@ private fun SignupExperience(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileImagePicker(
+    imageUrl: String,
+    onImageSelected: (String) -> Unit
+) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { onImageSelected(it.toString()) }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFF0F5E5))
+                .clickable { launcher.launch("image/*") },
+            contentAlignment = Alignment.Center
+        ) {
+            if (imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.PhotoCamera,
+                    contentDescription = "Select Photo",
+                    tint = ForestPrimary,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = if (imageUrl.isEmpty()) "Tap to upload profile picture" else "Change photo",
+            style = MaterialTheme.typography.labelLarge,
+            color = ForestPrimary
+        )
     }
 }
 

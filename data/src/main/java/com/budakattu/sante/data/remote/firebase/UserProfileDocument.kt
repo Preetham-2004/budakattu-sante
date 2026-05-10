@@ -4,6 +4,7 @@ data class UserProfileDocument(
     val uid: String = "",
     val name: String = "",
     val email: String = "",
+    val profilePictureUrl: String? = null,
     val role: String = "BUYER",
     val cooperativeId: String? = null,
     val onboardingCompleted: Boolean = true,

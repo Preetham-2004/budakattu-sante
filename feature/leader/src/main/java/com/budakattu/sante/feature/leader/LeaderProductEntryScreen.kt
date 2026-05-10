@@ -5,8 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -112,14 +110,14 @@ private fun LeaderProductEntryScreen(
     onSave: () -> Unit,
 ) {
     HeritageScaffold(
-        title = "Product Listing",
-        subtitle = "Detailed stock tracking and fair-price monitoring.",
+        title = "Traditional Listing",
+        subtitle = "A subtle approach to marketplace management.",
         topBarContent = {
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f))
+                    .background(Color.White.copy(alpha = 0.15f)),
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
             }
@@ -131,36 +129,36 @@ private fun LeaderProductEntryScreen(
             bottomBar = {
                 Surface(
                     color = TraditionalSurface,
-                    tonalElevation = 8.dp,
-                    shadowElevation = 16.dp,
-                    border = BorderStroke(1.dp, TraditionalPrimary.copy(alpha = 0.05f))
+                    tonalElevation = 4.dp,
+                    shadowElevation = 12.dp,
+                    border = BorderStroke(1.dp, TraditionalPrimary.copy(alpha = 0.04f))
                 ) {
                     Column(modifier = Modifier.padding(16.dp).navigationBarsPadding()) {
                         Button(
                             onClick = onSave,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = TraditionalPrimary),
                             enabled = !uiState.isSaving
                         ) {
                             if (uiState.isSaving) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             } else {
                                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("PUBLISH LISTING", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Text("PUBLISH LISTING", fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                             }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         OutlinedButton(
                             onClick = onSaveDraft,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, TraditionalPrimary.copy(alpha = 0.3f))
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, TraditionalPrimary.copy(alpha = 0.25f))
                         ) {
                             Icon(Icons.Default.Save, contentDescription = null, tint = TraditionalPrimary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("SAVE DRAFT", color = TraditionalPrimary, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                            Text("SAVE AS DRAFT", color = TraditionalPrimary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -177,31 +175,32 @@ private fun LeaderProductEntryScreen(
                 item {
                     TraditionalSection(title = "Availability") {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             ProductAvailability.entries.forEach { option ->
                                 val selected = uiState.availability == option
                                 Surface(
                                     modifier = Modifier.weight(1f).clickable { onAvailabilityChange(option) },
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = if (selected) TraditionalPrimary.copy(alpha = 0.05f) else Color.White,
-                                    border = BorderStroke(1.dp, if (selected) TraditionalPrimary else Color.LightGray.copy(alpha = 0.3f))
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = if (selected) TraditionalPrimary.copy(alpha = 0.04f) else Color.White,
+                                    border = BorderStroke(1.dp, if (selected) TraditionalPrimary.copy(alpha = 0.6f) else ClayBorder.copy(alpha = 0.4f))
                                 ) {
                                     Text(
                                         text = option.name.replace("_", "\n"),
-                                        modifier = Modifier.padding(vertical = 8.dp),
+                                        modifier = Modifier.padding(vertical = 10.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         textAlign = TextAlign.Center,
                                         color = if (selected) TraditionalPrimary else Color.Gray,
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        lineHeight = 12.sp
+                                        lineHeight = 12.sp,
+                                        fontSize = 9.sp
                                     )
                                 }
                             }
                         }
                         
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -209,23 +208,28 @@ private fun LeaderProductEntryScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Pre-booking enabled", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                                Text("Allow early reservations.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                Text("Pre-booking enabled", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = CharcoalInk)
+                                Text("Reserve stock before harvest.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             }
                             Switch(
                                 checked = uiState.isPrebookEnabled,
                                 onCheckedChange = onPrebookEnabledChange,
-                                colors = SwitchDefaults.colors(checkedThumbColor = TraditionalPrimary, checkedTrackColor = TraditionalPrimary.copy(alpha = 0.3f))
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = TraditionalPrimary,
+                                    checkedTrackColor = TraditionalPrimary.copy(alpha = 0.2f),
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Color.LightGray.copy(alpha = 0.3f)
+                                )
                             )
                         }
                     }
                 }
 
                 item {
-                    TraditionalSection(title = "Product Details") {
-                        TraditionalTextField("Product Name", uiState.name, onNameChange, "Wild Honey")
+                    TraditionalSection(title = "Information") {
+                        SubtleTextField("Product Name", uiState.name, onNameChange, "Wild Honey")
                         
-                        Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp))
+                        Text("Category", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = StoneWarm, modifier = Modifier.padding(top = 16.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -235,8 +239,8 @@ private fun LeaderProductEntryScreen(
                                 Surface(
                                     modifier = Modifier.weight(1f).clickable { onCategoryChange(cat) },
                                     shape = RoundedCornerShape(8.dp),
-                                    color = if (selected) TraditionalSecondary.copy(alpha = 0.05f) else Color.White,
-                                    border = BorderStroke(1.dp, if (selected) TraditionalSecondary else Color.LightGray.copy(alpha = 0.3f))
+                                    color = if (selected) TraditionalSecondary.copy(alpha = 0.04f) else Color.White,
+                                    border = BorderStroke(1.dp, if (selected) TraditionalSecondary.copy(alpha = 0.6f) else ClayBorder.copy(alpha = 0.4f))
                                 ) {
                                     Text(
                                         text = cat,
@@ -250,66 +254,57 @@ private fun LeaderProductEntryScreen(
                             }
                         }
                         
-                        TraditionalTextField("Short Description", uiState.description, onDescriptionChange, "Describe the product...", minLines = 3)
+                        SubtleTextField("Short Description", uiState.description, onDescriptionChange, "Describe the product...", minLines = 3)
                         
-                        TraditionalTextField("Audio Script (Accessibility)", uiState.audioDescription, onAudioDescriptionChange, "The spoken description...", minLines = 2)
-                        
-                        TraditionalTextField("Image URL", uiState.imageUrl, onImageUrlChange, "Link to product image")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Audio Script", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = StoneWarm)
+                            TextButton(onClick = onAutofillAudio) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = TraditionalPrimary)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Auto-Generate", style = MaterialTheme.typography.labelSmall, color = TraditionalPrimary)
+                            }
+                        }
+                        SubtleTextField("", uiState.audioDescription, onAudioDescriptionChange, "The spoken description...", minLines = 2)
                     }
                 }
 
                 item {
-                    TraditionalSection(title = "Value & Source") {
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                TraditionalTextField("Price (₹)", uiState.price, onPriceChange, "450")
-                            }
-                            Box(modifier = Modifier.weight(1f)) {
-                                TraditionalTextField("Quantity", uiState.quantity, onQuantityChange, "10")
-                            }
+                    TraditionalSection(title = "Value & Roots") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(modifier = Modifier.weight(1f)) { SubtleTextField("Price (₹)", uiState.price, onPriceChange, "450") }
+                            Box(modifier = Modifier.weight(1f)) { SubtleTextField("Quantity", uiState.quantity, onQuantityChange, "10") }
                         }
                         
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                TraditionalTextField("MSP (₹)", uiState.msp, onMspChange, "250")
-                            }
-                            Box(modifier = Modifier.weight(1f)) {
-                                TraditionalTextField("Unit", uiState.unit, onUnitChange, "kg")
-                            }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(modifier = Modifier.weight(1f)) { SubtleTextField("MSP (₹)", uiState.msp, onMspChange, "250") }
+                            Box(modifier = Modifier.weight(1f)) { SubtleTextField("Unit", uiState.unit, onUnitChange, "kg") }
                         }
                         
-                        TraditionalTextField("Harvest Season", uiState.season, onSeasonChange, "Summer 2026")
-                        
-                        TraditionalTextField("Supplied by Family", uiState.familyName, onFamilyNameChange, "e.g., Koliya Beta Family Group")
-                        
-                        TraditionalTextField("Origin Village", uiState.village, onVillageChange, "Agumbe, Shimoga")
+                        SubtleTextField("Harvest Season", uiState.season, onSeasonChange, "Summer 2026")
+                        SubtleTextField("Supplied by Family", uiState.familyName, onFamilyNameChange, "Koliya Beta Family")
+                        SubtleTextField("Origin Village", uiState.village, onVillageChange, "Agumbe, Shimoga")
                     }
                 }
-                
+
                 item {
-                    TraditionalSection(title = "Management") {
-                        TraditionalTextField("Expected Dispatch (Pre-book)", uiState.expectedDispatch, onExpectedDispatchChange, "June 2026")
+                    TraditionalSection(title = "Logistics") {
+                        TraditionalTextField("Expected Dispatch", uiState.expectedDispatch, onExpectedDispatchChange, "June 2026")
                         TraditionalTextField("Pre-book Limit", uiState.prebookLimit, onPrebookLimitChange, "10")
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
                         TraditionalTextField("Harvest Date", uiState.harvestDate, onHarvestDateChange, "25 May 2026")
+                        TraditionalTextField("Expiry Date", uiState.expiryDate, onExpiryDateChange, "25 Nov 2026")
                         TraditionalTextField("Batch Number", uiState.batchNumber, onBatchNumberChange, "HB-2026-001")
                         
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp)) {
-                            Checkbox(
-                                checked = uiState.isVisible, 
-                                onCheckedChange = onVisibilityChange,
-                                colors = CheckboxDefaults.colors(checkedColor = TraditionalPrimary)
-                            )
-                            Text("Make visible to buyers", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = uiState.notifyBuyers, 
-                                onCheckedChange = onNotifyBuyersChange,
-                                colors = CheckboxDefaults.colors(checkedColor = TraditionalPrimary)
-                            )
-                            Text("Notify buyers about new product", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
+                            Checkbox(checked = uiState.isVisible, onCheckedChange = onVisibilityChange, colors = CheckboxDefaults.colors(checkedColor = TraditionalPrimary))
+                            Text("Visible in market", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
                         }
                     }
                 }
@@ -319,16 +314,26 @@ private fun LeaderProductEntryScreen(
 }
 
 @Composable
+private fun TraditionalTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    SubtleTextField(label, value, onValueChange, placeholder)
+}
+
+@Composable
 private fun TraditionalSection(title: String, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         color = TraditionalSurface,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.1f))
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, ClayBorder.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = TraditionalPrimary)
+            Text(text = title.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = StoneWarm, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(12.dp))
             content()
         }
@@ -336,24 +341,27 @@ private fun TraditionalSection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun TraditionalTextField(
+private fun SubtleTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
     minLines: Int = 1
 ) {
-    Column(modifier = Modifier.padding(top = 16.dp)) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+    Column(modifier = Modifier.padding(top = 10.dp)) {
+        if (label.isNotEmpty()) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = StoneWarm)
+        }
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            placeholder = { Text(placeholder, color = Color.LightGray) },
-            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            placeholder = { Text(placeholder, color = Color.LightGray, style = MaterialTheme.typography.bodySmall) },
+            shape = RoundedCornerShape(12.dp),
+            textStyle = MaterialTheme.typography.bodyMedium,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = TraditionalPrimary,
-                unfocusedBorderColor = Color.LightGray.copy(alpha = 0.4f),
+                unfocusedBorderColor = ClayBorder.copy(alpha = 0.5f),
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White
             ),

@@ -11,6 +11,7 @@ class SignUpUseCase @Inject constructor(
         name: String,
         email: String,
         password: String,
+        profilePictureUri: String? = null,
         role: UserRole,
-    ) = sessionRepository.signUp(name, email, password, role)
+    ) = sessionRepository.signUp(name, email, password, profilePictureUri, role)
 }

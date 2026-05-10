@@ -9,6 +9,6 @@ interface SessionRepository {
     suspend fun completeOnboarding()
     suspend fun signIn(email: String, password: String)
     suspend fun signInWithGoogle(idToken: String)
-    suspend fun signUp(name: String, email: String, password: String, role: UserRole)
+    suspend fun signUp(name: String, email: String, password: String, profilePictureUri: String?, role: UserRole)
     suspend fun signOut()
 }

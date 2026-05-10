@@ -20,6 +20,7 @@ import com.budakattu.sante.feature.auth.SignupScreen
 import com.budakattu.sante.feature.auth.SplashRoute
 import com.budakattu.sante.feature.catalog.ui.CatalogRoute
 import com.budakattu.sante.feature.leader.LeaderDashboardRoute
+import com.budakattu.sante.feature.leader.LeaderInsightsRoute
 import com.budakattu.sante.feature.leader.LeaderInventoryRoute
 import com.budakattu.sante.feature.leader.LeaderProductEntryRoute
 import com.budakattu.sante.feature.orders.BuyerOrdersRoute
@@ -94,6 +95,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                 onOpenRoute = { route ->
                     navController.navigate(route)
                 },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(NavRoutes.HERITAGE) {
@@ -103,6 +105,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                         launchSingleTop = true
                     }
                 },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(NavRoutes.ORDERS) {
@@ -121,6 +124,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                 onOpenOrder = { orderId ->
                     navController.navigate("${NavRoutes.ORDER_DETAIL_PREFIX}/$orderId")
                 },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(NavRoutes.CART) {
@@ -149,6 +153,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                         popUpTo(NavRoutes.CATALOG)
                     }
                 },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(
@@ -173,6 +178,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                         popUpTo(NavRoutes.BUYER_GRAPH) { inclusive = true }
                     }
                 },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(
@@ -180,7 +186,9 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
             arguments = listOf(navArgument("productId") { type = NavType.StringType }),
             deepLinks = listOf(navDeepLink { uriPattern = "budakattu://product/{productId}" }),
         ) {
-            ProductDetailRoute()
+            ProductDetailRoute(
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
@@ -191,7 +199,7 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
             val authViewModel: AuthViewModel = hiltViewModel()
             LeaderDashboardRoute(
                 onAddProduct = {
-                    navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
+                    navController.navigate(NavRoutes.LEADER_PRODUCT_FORM_PREFIX)
                 },
                 onOpenOrders = {
                     navController.navigate(NavRoutes.LEADER_ORDERS)
@@ -199,25 +207,17 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
                 onOpenInventory = {
                     navController.navigate(NavRoutes.LEADER_INVENTORY)
                 },
+                onOpenInsights = {
+                    navController.navigate(NavRoutes.LEADER_INSIGHTS)
+                },
                 onEditDraft = { productId ->
-                    // For now redirect to add product, or a specific edit route if exists
-                    navController.navigate(NavRoutes.LEADER_ADD_PRODUCT)
+                    navController.navigate("${NavRoutes.LEADER_PRODUCT_FORM_PREFIX}?productId=$productId")
                 },
                 onSignOut = {
                     authViewModel.signOut()
                     navController.navigate(NavRoutes.AUTH_GRAPH) {
                         popUpTo(NavRoutes.LEADER_GRAPH) { inclusive = true } }
                 },
-            )
-        }
-        composable(NavRoutes.LEADER_ADD_PRODUCT) {
-            LeaderProductEntryRoute(
-                onBack = { navController.popBackStack() },
-                onSuccess = {
-                    navController.navigate(NavRoutes.BUYER_GRAPH) {
-                        popUpTo(NavRoutes.LEADER_HOME)
-                    }
-                }
             )
         }
         composable(NavRoutes.LEADER_ORDERS) {
@@ -228,7 +228,29 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
         composable(NavRoutes.LEADER_INVENTORY) {
             LeaderInventoryRoute(
                 onBack = { navController.popBackStack() },
-                onAddProduct = { navController.navigate(NavRoutes.LEADER_ADD_PRODUCT) }
+                onAddProduct = { navController.navigate(NavRoutes.LEADER_PRODUCT_FORM_PREFIX) }
+            )
+        }
+        composable(NavRoutes.LEADER_INSIGHTS) {
+            LeaderInsightsRoute(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = NavRoutes.LEADER_PRODUCT_FORM,
+            arguments = listOf(navArgument("productId") { 
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) {
+            LeaderProductEntryRoute(
+                onBack = { navController.popBackStack() },
+                onSuccess = {
+                    navController.navigate(NavRoutes.BUYER_GRAPH) {
+                        popUpTo(NavRoutes.LEADER_HOME)
+                    }
+                }
             )
         }
     }

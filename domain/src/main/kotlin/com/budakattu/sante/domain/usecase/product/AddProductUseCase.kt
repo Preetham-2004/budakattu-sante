@@ -10,10 +10,10 @@ import javax.inject.Inject
 class AddProductUseCase @Inject constructor(
     private val productRepository: ProductRepository,
 ) {
-    suspend operator fun invoke(draft: ProductDraft, isDraft: Boolean = false) {
+    suspend operator fun invoke(draft: ProductDraft, isDraft: Boolean = false, productId: String? = null) {
         val now = System.currentTimeMillis()
         val product = Product(
-            productId = buildProductId(draft.name, now),
+            productId = productId ?: buildProductId(draft.name, now),
             familyId = buildFamilyId(draft.familyName),
             categoryId = draft.categoryId,
             name = draft.name.trim(),

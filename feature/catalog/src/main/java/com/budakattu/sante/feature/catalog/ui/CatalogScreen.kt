@@ -1,9 +1,11 @@
 package com.budakattu.sante.feature.catalog.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -36,6 +38,7 @@ import com.budakattu.sante.feature.catalog.viewmodel.ProductListViewModel
 fun CatalogRoute(
     onOpenProduct: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
+    onBack: () -> Unit,
     viewModel: ProductListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -54,6 +57,7 @@ fun CatalogRoute(
         snackbarHostState = snackbarHostState,
         onProductClick = viewModel::onProductClick,
         onOpenRoute = onOpenRoute,
+        onBack = onBack,
     )
 }
 
@@ -63,10 +67,44 @@ fun CatalogScreen(
     snackbarHostState: SnackbarHostState,
     onProductClick: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
+    onBack: () -> Unit,
 ) {
+    val successState = uiState as? ProductListUiState.Success
     HeritageScaffold(
         title = "Marketplace",
         subtitle = "Authentic tribal harvest directly from the forest.",
+        showBack = true,
+        onBack = onBack,
+        topBarContent = {
+            if (successState != null && successState.userName != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(
+                            model = successState.userProfilePictureUrl ?: "https://i.pravatar.cc/150?u=${successState.userName}",
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.2f)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Namaste, ${successState.userName}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

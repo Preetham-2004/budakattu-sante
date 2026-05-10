@@ -52,6 +52,10 @@ class AuthViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedRole = role, errorMessage = null)
     }
 
+    fun updateProfilePictureUrl(url: String) {
+        _uiState.value = _uiState.value.copy(profilePictureUrl = url, errorMessage = null)
+    }
+
     fun setErrorMessage(message: String) {
         _uiState.value = _uiState.value.copy(errorMessage = message, isLoading = false)
     }
@@ -98,6 +102,7 @@ class AuthViewModel @Inject constructor(
                     name = current.name.trim(),
                     email = current.email.trim(),
                     password = current.password,
+                    profilePictureUri = current.profilePictureUrl.trim().takeIf { it.isNotBlank() },
                     role = current.selectedRole,
                 )
             }.onFailure { error ->

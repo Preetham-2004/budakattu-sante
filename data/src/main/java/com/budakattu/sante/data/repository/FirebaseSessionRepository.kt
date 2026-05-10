@@ -16,9 +16,12 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import android.content.Context
+import android.net.Uri
+import androidx.core.net.toUri
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -32,6 +35,7 @@ class FirebaseSessionRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage,
 ) : SessionRepository {
     override fun observeSession(): Flow<SessionState> = callbackFlow {
         val onboardingCompleted = dataStore.data.first()[SessionPreferences.ONBOARDING_COMPLETED] ?: false
@@ -67,6 +71,7 @@ class FirebaseSessionRepository @Inject constructor(
                                     userId = user.uid,
                                     name = profile.name.ifBlank { user.email.orEmpty() },
                                     role = profile.role.toUserRole(),
+                                    profilePictureUrl = profile.profilePictureUrl,
                                     cooperativeId = profile.cooperativeId,
                                     onboardingCompleted = profile.onboardingCompleted,
                                 ),
@@ -100,14 +105,23 @@ class FirebaseSessionRepository @Inject constructor(
         ensureUserProfile(firebaseUser)
     }
 
-    override suspend fun signUp(name: String, email: String, password: String, role: UserRole) {
+    override suspend fun signUp(name: String, email: String, password: String, profilePictureUri: String?, role: UserRole) {
         val authResult = awaitTask { firebaseAuth.createUserWithEmailAndPassword(email, password) }
         val firebaseUser = requireNotNull(authResult.user)
+        
+        var finalProfilePictureUrl: String? = null
+        if (profilePictureUri != null) {
+            val storageRef = storage.reference.child("profiles/${firebaseUser.uid}.jpg")
+            awaitTask { storageRef.putFile(profilePictureUri.toUri()) }
+            finalProfilePictureUrl = awaitTask { storageRef.downloadUrl }.toString()
+        }
+
         val now = System.currentTimeMillis()
         val profile = UserProfileDocument(
             uid = firebaseUser.uid,
             name = name,
             email = email,
+            profilePictureUrl = finalProfilePictureUrl,
             role = role.name,
             cooperativeId = if (role == UserRole.LEADER) FirestorePaths.DEFAULT_COOPERATIVE_ID else null,
             onboardingCompleted = true,
@@ -152,6 +166,7 @@ class FirebaseSessionRepository @Inject constructor(
             uid = firebaseUser.uid,
             name = firebaseUser.displayName ?: firebaseUser.email?.substringBefore("@").orEmpty(),
             email = firebaseUser.email.orEmpty(),
+            profilePictureUrl = firebaseUser.photoUrl?.toString(),
             role = UserRole.BUYER.name,
             cooperativeId = null,
             onboardingCompleted = onboardingCompleted,
@@ -171,14 +186,18 @@ class FirebaseSessionRepository @Inject constructor(
         val snapshot = awaitTask { profileRef.get() }
         if (!snapshot.exists()) {
             bootstrapUserProfile(firebaseUser, onboardingCompleted)
-        } else if (snapshot.getBoolean("onboardingCompleted") != true) {
-            awaitTask {
-                profileRef.update(
-                    mapOf(
-                        "onboardingCompleted" to onboardingCompleted,
-                        "updatedAt" to System.currentTimeMillis(),
-                    ),
-                )
+        } else {
+            val updates = mutableMapOf<String, Any>()
+            if (snapshot.getBoolean("onboardingCompleted") != true) {
+                updates["onboardingCompleted"] = onboardingCompleted
+            }
+            if (snapshot.getString("profilePictureUrl") == null && firebaseUser.photoUrl != null) {
+                updates["profilePictureUrl"] = firebaseUser.photoUrl.toString()
+            }
+            
+            if (updates.isNotEmpty()) {
+                updates["updatedAt"] = System.currentTimeMillis()
+                awaitTask { profileRef.update(updates) }
             }
         }
         dataStore.edit { preferences ->

@@ -233,6 +233,7 @@ data class CartItemUi(
     val dispatchLabel: String?,
     val availabilityLabel: String,
     val sourceLabel: String,
+    val imageUrl: String?,
 )
 
 data class OrderCardUi(
@@ -291,6 +292,7 @@ private fun toCartItemUi(item: CartItem): CartItemUi {
         dispatchLabel = item.expectedDispatchDate,
         availabilityLabel = item.availability.name.replace("_", " "),
         sourceLabel = "${item.familyName}, ${item.village}",
+        imageUrl = item.imageUrl,
     )
 }
 

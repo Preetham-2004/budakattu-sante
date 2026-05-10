@@ -7,6 +7,8 @@ sealed interface ProductListUiState {
     data class Success(
         val products: List<ProductUiModel>,
         val isOffline: Boolean,
+        val userName: String? = null,
+        val userProfilePictureUrl: String? = null,
     ) : ProductListUiState
     data class Error(val message: String) : ProductListUiState
     data object Offline : ProductListUiState

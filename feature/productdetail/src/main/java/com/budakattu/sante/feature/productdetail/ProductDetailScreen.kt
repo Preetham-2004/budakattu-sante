@@ -3,6 +3,8 @@ package com.budakattu.sante.feature.productdetail
 import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,7 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +41,7 @@ import java.util.Locale
 
 @Composable
 fun ProductDetailRoute(
+    onBack: () -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -60,6 +66,7 @@ fun ProductDetailRoute(
     ProductDetailScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
+        onBack = onBack,
         onAudioDescriptionClick = {
             val state = uiState as? ProductDetailUiState.Success
             if (state != null) {
@@ -72,8 +79,7 @@ fun ProductDetailRoute(
                 viewModel.onAudioDescriptionClick()
             }
         },
-        onAddToCart = viewModel::addToCart,
-        onPreorderClick = viewModel::onPreorderClick,
+        onPaymentClick = viewModel::onPaymentClick
     )
 }
 
@@ -81,13 +87,15 @@ fun ProductDetailRoute(
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
     snackbarHostState: SnackbarHostState,
+    onBack: () -> Unit,
     onAudioDescriptionClick: () -> Unit,
-    onAddToCart: (Int) -> Unit,
-    onPreorderClick: (Int) -> Unit,
+    onPaymentClick: (Int) -> Unit,
 ) {
     HeritageScaffold(
         title = "Product Detail",
         subtitle = "Forest harvest with traceability and fair-price commitment.",
+        showBack = true,
+        onBack = onBack
     ) { outerPadding ->
         Scaffold(
             containerColor = Color.Transparent,
@@ -101,8 +109,7 @@ fun ProductDetailScreen(
                     outerPadding = outerPadding,
                     innerPadding = innerPadding,
                     onAudioDescriptionClick = onAudioDescriptionClick,
-                    onAddToCart = onAddToCart,
-                    onPreorderClick = onPreorderClick,
+                    onPaymentClick = onPaymentClick,
                 )
             }
         }
@@ -135,8 +142,7 @@ private fun DetailContent(
     outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onAudioDescriptionClick: () -> Unit,
-    onAddToCart: (Int) -> Unit,
-    onPreorderClick: (Int) -> Unit,
+    onPaymentClick: (Int) -> Unit,
 ) {
     val product = state.product
     var quantity by remember(product.id) { mutableIntStateOf(1) }
@@ -201,12 +207,59 @@ private fun DetailContent(
 
         item {
             HighlightCard {
-                Text("Origin Story", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = product.description, style = MaterialTheme.typography.bodyLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Storefront, contentDescription = null, tint = ForestPrimary, modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Product Owner & Admin", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = ForestPrimary)
+                }
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("Village: ${product.village}", style = MaterialTheme.typography.labelLarge)
-                Text("Harvested by ${product.familyTitle}", style = MaterialTheme.typography.labelLarge)
+                
+                Surface(
+                    color = ForestBackground,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = product.familyTitle,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black,
+                            color = TraditionalPrimary
+                        )
+                        Text(
+                            text = "Official Cooperative Administrator",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                        
+                        product.familyDetails?.let { details ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Expertise: ${details.primaryCraft}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Region: ${details.forestRegion}, ${details.district}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = CharcoalInk.copy(alpha = 0.7f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Village: ${product.village}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Origin Story", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                
+                val displayStory = product.familyDetails?.story ?: product.description
+                Text(text = displayStory, style = MaterialTheme.typography.bodyMedium, color = CharcoalInk.copy(alpha = 0.8f))
             }
         }
 
@@ -238,23 +291,38 @@ private fun DetailContent(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Button(
-                    onClick = { onPreorderClick(quantity) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    onClick = { onPaymentClick(quantity) },
+                    modifier = Modifier.fillMaxWidth().height(64.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ForestPrimary,
+                        disabledContainerColor = ForestPrimary.copy(alpha = 0.5f)
+                    ),
+                    enabled = !state.isProcessingPayment && product.ctaLabel != "Unavailable"
                 ) {
-                    Text(product.ctaLabel.uppercase(), fontWeight = FontWeight.Bold)
+                    if (state.isProcessingPayment) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("PROCESSING...", fontWeight = FontWeight.Bold)
+                    } else {
+                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(product.ctaLabel.uppercase(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedButton(
-                    onClick = { onAddToCart(quantity) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(2.dp, ForestPrimary)
-                ) {
-                    Text("ADD TO CART", color = ForestPrimary, fontWeight = FontWeight.Bold)
+
+                if (product.ctaLabel != "Unavailable") {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Secure payment powered by Razorpay",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 }
             }
         }

@@ -7,59 +7,50 @@ import com.budakattu.sante.domain.model.ProductAvailability
 import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
 import com.budakattu.sante.domain.usecase.product.SeedCatalogUseCase
+import com.budakattu.sante.domain.model.SessionState
+import com.budakattu.sante.domain.usecase.session.ObserveSessionUseCase
 import com.budakattu.sante.domain.util.MspValidator
 import com.budakattu.sante.feature.catalog.ui.ProductListEvent
 import com.budakattu.sante.feature.catalog.ui.ProductListUiState
 import com.budakattu.sante.feature.catalog.ui.ProductUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase,
-    private val seedCatalogUseCase: SeedCatalogUseCase,
-    private val networkMonitor: NetworkMonitor,
+    getProductsUseCase: GetProductsUseCase,
+    seedCatalogUseCase: SeedCatalogUseCase,
+    observeSessionUseCase: ObserveSessionUseCase,
+    networkMonitor: NetworkMonitor,
     private val mspValidator: MspValidator,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
-    val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<ProductListUiState> = combine(
+        getProductsUseCase(),
+        observeSessionUseCase()
+    ) { products, session ->
+        if (products.isEmpty() && !networkMonitor.isOnline) {
+            ProductListUiState.Offline
+        } else {
+            val user = (session as? SessionState.LoggedIn)
+            ProductListUiState.Success(
+                products = products.map(::toUiModel),
+                isOffline = !networkMonitor.isOnline,
+                userName = user?.name,
+                userProfilePictureUrl = user?.profilePictureUrl
+            )
+        }
+    }.onStart {
+        runCatching { seedCatalogUseCase() }
+    }.catch { error ->
+        emit(ProductListUiState.Error(error.localizedMessage ?: "Unknown error"))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProductListUiState.Loading)
 
     private val _events = MutableSharedFlow<ProductListEvent>()
     val events: SharedFlow<ProductListEvent> = _events.asSharedFlow()
-
-    init {
-        loadProducts()
-    }
-
-    private fun loadProducts() {
-        viewModelScope.launch {
-            runCatching { seedCatalogUseCase() }
-            getProductsUseCase()
-                .onStart { _uiState.value = ProductListUiState.Loading }
-                .catch { error ->
-                    _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Unknown error")
-                }
-                .collect { products ->
-                    _uiState.value = if (products.isEmpty() && !networkMonitor.isOnline) {
-                        ProductListUiState.Offline
-                    } else {
-                        ProductListUiState.Success(
-                            products = products.map(::toUiModel),
-                            isOffline = !networkMonitor.isOnline,
-                        )
-                    }
-                }
-        }
-    }
 
     fun onProductClick(productId: String) {
         viewModelScope.launch {

@@ -14,11 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.budakattu.sante.core.ui.theme.TraditionalPrimary
 import com.budakattu.sante.core.ui.theme.TraditionalSurface
 
+import androidx.compose.foundation.layout.ColumnScope
+
 @Composable
 fun ForestCard(
     modifier: Modifier = Modifier,
     containerColor: Color = TraditionalSurface,
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -27,16 +29,17 @@ fun ForestCard(
         border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(20.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            content()
-        }
+        Column(
+            modifier = Modifier.padding(16.dp),
+            content = content
+        )
     }
 }
 
 @Composable
 fun HighlightCard(
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -45,8 +48,9 @@ fun HighlightCard(
         border = BorderStroke(1.dp, TraditionalPrimary.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(20.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            content()
-        }
+        Column(
+            modifier = Modifier.padding(16.dp),
+            content = content
+        )
     }
 }

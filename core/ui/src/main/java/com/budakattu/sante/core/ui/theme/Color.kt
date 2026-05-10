@@ -2,32 +2,41 @@ package com.budakattu.sante.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Premium Traditional Palette from Reference Image
-val ForestPrimary = Color(0xFF1B300B)
-val LeafAccent = Color(0xFF7BAF45)
-val AmberHarvest = Color(0xFFC4884A)
-val Parchment = Color(0xFFFDFCF4) // Warm Ivory Background
+// Subtle Traditional Palette
+val SageMuted = Color(0xFF7D8C69)
+val ClayMuted = Color(0xFFB68D7E)
+val StoneWarm = Color(0xFFA49382)
+val IvorySoft = Color(0xFFFBF9F4)
+val GoldSubtle = Color(0xFFC5A059)
+
+val ForestPrimary = SageMuted
+val LeafAccent = Color(0xFF94A684)
+val AmberHarvest = GoldSubtle
+val Parchment = IvorySoft
 val MossSurface = Color(0xFFFFFFFF)
-val BarkBrown = Color(0xFF422112)
-val CharcoalInk = Color(0xFF241A14)
-val ClayBorder = Color(0xFFB48657)
-val MilletGold = Color(0xFFD9B36C)
-val MistVeil = Color(0xFFF1E7D2)
-val MspSafe = Color(0xFF3B6D11)
-val MspDanger = Color(0xFFA32D2D)
+val BarkBrown = Color(0xFF5D544F)
+val CharcoalInk = Color(0xFF4A4A4A)
+val ClayBorder = Color(0xFFE8E4DE)
+val MilletGold = Color(0xFFD8C4A0)
+val MistVeil = Color(0xFFF2F0EB)
 
-// Eye-catchy accents
-val SunsetClay = Color(0xFFCA6B4E)
-val DeepForest = Color(0xFF1B300B)
-val GoldLustre = Color(0xFFD4AF37)
-val GlassWhite = Color(0x99FFFFFF)
-val ShadowBrown = Color(0xFF422112)
-val SoftMoss = Color(0xFFE6EDD6)
+val MspSafe = Color(0xFF6B7B56)
+val MspDanger = Color(0xFFBD7D7D)
 
-// Base Traditional aliases
+// Accents (Subtle versions)
+val SunsetClay = ClayMuted
+val DeepForest = Color(0xFF4A523D)
+val GoldLustre = GoldSubtle
+val GlassWhite = Color(0xAAFFFFFF)
+val ShadowBrown = Color(0x08000000)
+val SoftMoss = Color(0xFFECF0E6)
+
+// Aliases
 val TraditionalPrimary = ForestPrimary
 val TraditionalSecondary = LeafAccent
 val TraditionalBackground = Parchment
 val TraditionalSurface = MossSurface
-
 val ForestBackground = TraditionalBackground
+val ForestMedium = LeafAccent
+val ForestLight = Color(0xFFC6D0C0)
+val DeepSlate = BarkBrown

@@ -1,27 +1,70 @@
 package com.budakattu.sante.feature.leader
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.budakattu.sante.domain.model.ProductAvailability
 import com.budakattu.sante.domain.model.ProductDraft
 import com.budakattu.sante.domain.usecase.product.AddProductUseCase
+import com.budakattu.sante.domain.usecase.product.GetProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LeaderProductFormViewModel @Inject constructor(
     private val addProductUseCase: AddProductUseCase,
+    private val getProductUseCase: GetProductUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val productId: String? = savedStateHandle["productId"]
+
     private val _uiState = MutableStateFlow(LeaderProductFormUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<String>()
     val events = _events.asSharedFlow()
+
+    init {
+        if (productId != null) {
+            loadProduct(productId)
+        }
+    }
+
+    private fun loadProduct(id: String) {
+        viewModelScope.launch {
+            val product = getProductUseCase(id).firstOrNull()
+            if (product != null) {
+                _uiState.value = LeaderProductFormUiState(
+                    name = product.name,
+                    categoryName = product.categoryName,
+                    description = product.description,
+                    audioDescription = product.audioDescription,
+                    quantity = product.availableStock.toString(),
+                    unit = product.unit,
+                    price = product.pricePerUnit.toString(),
+                    msp = product.mspPerUnit.toString(),
+                    season = product.season.orEmpty(),
+                    familyName = product.familyName,
+                    village = product.village,
+                    imageUrl = product.imageUrls.firstOrNull().orEmpty(),
+                    expectedDispatch = product.expectedDispatchDate.orEmpty(),
+                    prebookLimit = product.preorderLimit.toString(),
+                    availability = product.availability,
+                    isPrebookEnabled = product.isPrebookEnabled,
+                    // Additional fields
+                    harvestDate = product.addedAt.toString(), // Simplified for now
+                    batchNumber = product.productId,
+                    isVisible = product.isAvailable
+                )
+            }
+        }
+    }
 
     fun updateName(value: String) = updateState { copy(name = value, errorMessage = null) }
     fun updateCategory(value: String) = updateState { copy(categoryName = value, errorMessage = null) }
@@ -72,7 +115,8 @@ class LeaderProductFormViewModel @Inject constructor(
                         expectedDispatchDate = current.expectedDispatch.trim().takeIf { it.isNotBlank() },
                         preorderLimit = current.prebookLimit.toIntOrNull() ?: 0,
                     ),
-                    isDraft = true
+                    isDraft = true,
+                    productId = productId
                 )
             }.onSuccess {
                 _uiState.value = current.copy(isSaving = false)
@@ -129,6 +173,7 @@ class LeaderProductFormViewModel @Inject constructor(
                         expectedDispatchDate = current.expectedDispatch.trim().takeIf { it.isNotBlank() },
                         preorderLimit = current.prebookLimit.toIntOrNull() ?: 0,
                     ),
+                    productId = productId
                 )
             }.onSuccess {
                 _uiState.value = LeaderProductFormUiState(
