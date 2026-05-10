@@ -10,5 +10,18 @@ interface SessionRepository {
     suspend fun signIn(email: String, password: String)
     suspend fun signInWithGoogle(idToken: String)
     suspend fun signUp(name: String, email: String, password: String, profilePictureUri: String?, role: UserRole)
+    suspend fun updateProfile(
+        name: String,
+        phoneNumber: String,
+        alternatePhoneNumber: String,
+        address: String,
+        landmark: String,
+        city: String,
+        district: String,
+        state: String,
+        pincode: String,
+        preferredLanguage: String,
+        deliveryInstructions: String,
+    )
     suspend fun signOut()
 }

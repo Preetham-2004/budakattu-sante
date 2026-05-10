@@ -24,6 +24,7 @@ import com.budakattu.sante.feature.leader.LeaderInsightsRoute
 import com.budakattu.sante.feature.leader.LeaderInventoryRoute
 import com.budakattu.sante.feature.leader.LeaderProductEntryRoute
 import com.budakattu.sante.feature.orders.BuyerOrdersRoute
+import com.budakattu.sante.feature.orders.BuyerProfileRoute
 import com.budakattu.sante.feature.orders.CartRoute
 import com.budakattu.sante.feature.orders.LeaderOrdersRoute
 import com.budakattu.sante.feature.orders.OrderConfirmationRoute
@@ -166,7 +167,12 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
         }
         composable(NavRoutes.PROFILE) {
             val authViewModel: AuthViewModel = hiltViewModel()
-            ProfileRouteScreen(
+            BuyerProfileRoute(
+                activeRoute = NavRoutes.PROFILE,
+                marketRoute = NavRoutes.CATALOG,
+                heritageRoute = NavRoutes.HERITAGE,
+                ordersRoute = NavRoutes.ORDERS,
+                profileRoute = NavRoutes.PROFILE,
                 onNavigate = { route ->
                     navController.navigate(route) {
                         launchSingleTop = true

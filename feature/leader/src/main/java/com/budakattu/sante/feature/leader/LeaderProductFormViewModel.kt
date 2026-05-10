@@ -60,7 +60,8 @@ class LeaderProductFormViewModel @Inject constructor(
                     // Additional fields
                     harvestDate = product.addedAt.toString(), // Simplified for now
                     batchNumber = product.productId,
-                    isVisible = product.isAvailable
+                    isVisible = product.isAvailable,
+                    isEditMode = true
                 )
             }
         }
@@ -233,5 +234,6 @@ data class LeaderProductFormUiState(
     val expiryDate: String = "25 Nov 2026",
     val batchNumber: String = "HB-2026-05-001",
     val isVisible: Boolean = true,
-    val notifyBuyers: Boolean = false
+    val notifyBuyers: Boolean = false,
+    val isEditMode: Boolean = false
 )

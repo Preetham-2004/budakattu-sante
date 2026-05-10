@@ -34,6 +34,7 @@ import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.BuyerRouteStrip
 import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
+import com.budakattu.sante.core.ui.components.LeaderScaffold
 import com.budakattu.sante.core.ui.components.RouteBadge
 import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.OrderStatus
@@ -190,22 +191,19 @@ fun LeaderOrdersRoute(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { snackbarHostState.showSnackbar(it) }
     }
-    HeritageScaffold(
-        title = "Pending Cooperative Orders",
-        subtitle = "Monitor reservations, confirm dispatch readiness, and close the loop on cooperative fulfilment.",
+
+    LeaderScaffold(
+        title = "Order Fulfillment",
+        subtitle = "Monitor reservations, confirm dispatch readiness, and close the loop.",
+        showBack = true,
+        onBack = onBack
     ) { padding ->
-        Scaffold(
-            containerColor = Color.Transparent,
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-        ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (val state = uiState) {
-                LeaderOrdersUiState.Loading -> LoadingBody(padding, innerPadding)
-                is LeaderOrdersUiState.Error -> MessageBody(padding, state.message, innerPadding)
-                is LeaderOrdersUiState.Content -> LeaderOrdersScreen(
-                    padding = padding,
-                    innerPadding = innerPadding,
+                LeaderOrdersUiState.Loading -> LoadingBody(PaddingValues(0.dp))
+                is LeaderOrdersUiState.Error -> MessageBody(PaddingValues(0.dp), state.message)
+                is LeaderOrdersUiState.Content -> LeaderOrdersContent(
                     state = state,
-                    onBack = onBack,
                     onUpdateStatus = viewModel::updateStatus,
                 )
             }
@@ -247,8 +245,12 @@ private fun BuyerOrdersScreen(
             ForestCard {
                 Text("Buyer order trail", style = MaterialTheme.typography.titleLarge)
                 Text("Review reservations, confirmations, and dispatch promises before the next seasonal cycle moves.")
-                Button(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), onClick = onOpenCart) {
-                    Text("Open cart")
+                Button(
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp), 
+                    onClick = onOpenCart,
+                    colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                ) {
+                    Text("Open cart", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -272,8 +274,12 @@ private fun BuyerOrdersScreen(
                     order.dispatchLabel?.let {
                         Text(it, modifier = Modifier.padding(top = 4.dp))
                     }
-                    Button(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), onClick = { onOpenOrder(order.orderId) }) {
-                        Text("Track order")
+                    Button(
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp), 
+                        onClick = { onOpenOrder(order.orderId) },
+                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                    ) {
+                        Text("Track order", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -445,7 +451,10 @@ private fun CartScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ForestPrimary,
+                                contentColor = Color.White
+                            ),
                             shape = RoundedCornerShape(28.dp)
                         ) {
                             Text("Confirm checkout", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -503,39 +512,15 @@ private fun OrderDetailScreen(
 }
 
 @Composable
-private fun LeaderOrdersScreen(
-    padding: PaddingValues,
-    innerPadding: PaddingValues,
+private fun LeaderOrdersContent(
     state: LeaderOrdersUiState.Content,
-    onBack: () -> Unit,
     onUpdateStatus: (String, OrderStatus) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(innerPadding),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 32.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(TraditionalPrimary.copy(alpha = 0.05f))
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TraditionalPrimary)
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("Order Fulfillment", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = BarkBrown)
-            }
-        }
-        
         if (state.orders.isEmpty()) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
@@ -547,9 +532,9 @@ private fun LeaderOrdersScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = TraditionalSurface,
+                    color = LeaderSurface,
                     shadowElevation = 2.dp,
-                    border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.1f))
+                    border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -557,34 +542,34 @@ private fun LeaderOrdersScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(order.orderId, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = TraditionalPrimary)
+                            Text(order.orderId, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = LeaderPrimary)
                             Surface(
-                                color = TraditionalSecondary.copy(alpha = 0.1f),
+                                color = LeaderHighlight,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    text = order.statusLabel,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    text = order.statusLabel.uppercase(),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = TraditionalSecondary,
+                                    color = LeaderSecondary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                         
-                        Text(order.summary, modifier = Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        Text(order.summary, modifier = Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         Text("Buyer: ${order.buyerLabel}", modifier = Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         
                         if (order.dispatchLabel != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = AmberHarvest, modifier = Modifier.size(12.dp))
+                                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = LeaderAccent, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(order.dispatchLabel, style = MaterialTheme.typography.labelSmall, color = AmberHarvest)
+                                Text(order.dispatchLabel, style = MaterialTheme.typography.labelSmall, color = LeaderAccent, fontWeight = FontWeight.Bold)
                             }
                         }
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -593,20 +578,26 @@ private fun LeaderOrdersScreen(
                                 Button(
                                     modifier = Modifier.weight(1f),
                                     onClick = { onUpdateStatus(order.orderId, OrderStatus.CONFIRMED) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = TraditionalPrimary),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = LeaderPrimary,
+                                        contentColor = Color.White
+                                    ),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("Confirm", fontWeight = FontWeight.Bold)
+                                    Text("CONFIRM", fontWeight = FontWeight.Bold)
                                 }
                             }
                             
-                            OutlinedButton(
+                            Button(
                                 modifier = Modifier.weight(1f),
                                 onClick = { onUpdateStatus(order.orderId, OrderStatus.COMPLETED) },
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, TraditionalSecondary)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = LeaderSecondary,
+                                    contentColor = Color.White
+                                )
                             ) {
-                                Text("Complete", color = TraditionalSecondary, fontWeight = FontWeight.Bold)
+                                Text("COMPLETE", fontWeight = FontWeight.Bold)
                             }
                         }
                     }

@@ -26,7 +26,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.ForestCard
-import com.budakattu.sante.core.ui.components.HeritageScaffold
+import com.budakattu.sante.core.ui.components.LeaderScaffold
 import com.budakattu.sante.core.ui.components.RouteBadge
 import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.Product
@@ -64,9 +64,9 @@ private fun LeaderDashboardScreen(
     onEditDraft: (String) -> Unit,
     onSignOut: () -> Unit,
 ) {
-    HeritageScaffold(
-        title = "Command Center",
-        subtitle = "Cooperative management with rooted trade identity.",
+    LeaderScaffold(
+        title = "Cooperative HQ",
+        subtitle = "Professional management of tribal harvests & trade.",
         topBarContent = {
             if (uiState is LeaderDashboardUiState.Success) {
                 Row(
@@ -79,7 +79,7 @@ private fun LeaderDashboardScreen(
                             model = uiState.profilePictureUrl ?: "https://i.pravatar.cc/150?u=${uiState.leaderName}",
                             contentDescription = null,
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(52.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.15f)),
                             contentScale = ContentScale.Crop
@@ -87,50 +87,40 @@ private fun LeaderDashboardScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = "Namaste, ${uiState.leaderName}",
-                                style = MaterialTheme.typography.titleLarge,
+                                text = uiState.leaderName,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = Color.White,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Bold
                             )
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(modifier = Modifier.size(6.dp).background(LeafAccent.copy(alpha = 0.7f), CircleShape))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "System Sync Active",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White.copy(alpha = 0.7f)
-                                )
-                            }
+                            Text(
+                                text = "Administrator",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
                         }
                     }
                     
-                    Surface(
+                    IconButton(
                         onClick = onSignOut,
-                        color = Color.White.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.size(height = 52.dp, width = 68.dp)
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.1f))
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                            Text("Logout", style = MaterialTheme.typography.labelSmall, color = Color.White, fontSize = 9.sp)
-                        }
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 }
             }
         }
-    ) { innerPadding: PaddingValues ->
+    ) { innerPadding ->
         when (uiState) {
             is LeaderDashboardUiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TraditionalPrimary, strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = LeaderPrimary, strokeWidth = 2.dp)
                 }
             }
             is LeaderDashboardUiState.Error -> {
                 Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                    Text(uiState.message, color = TraditionalPrimary.copy(alpha = 0.7f))
+                    Text(uiState.message, color = LeaderError)
                 }
             }
             is LeaderDashboardUiState.Success -> {
@@ -161,28 +151,24 @@ private fun LeaderDashboardContent(
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(innerPadding),
         verticalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(bottom = 32.dp)
+        contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
     ) {
         item {
             SummaryMetrics(data)
         }
 
         item {
-            OperationsSection(onAddProduct, onOpenOrders, onOpenInventory)
+            OperationsGrid(onAddProduct, onOpenOrders, onOpenInventory)
         }
 
         item {
-            AnalyticsInsightsStrip(onClick = onOpenInsights)
+            InsightsCard(onClick = onOpenInsights)
         }
 
         if (data.drafts.isNotEmpty()) {
             item {
-                SavedDraftsSection(data.drafts, onEditDraft)
+                DraftsSection(data.drafts, onEditDraft)
             }
-        }
-
-        item {
-            EarthyMarketInsight()
         }
     }
 }
@@ -194,9 +180,9 @@ private fun SummaryMetrics(data: LeaderDashboardUiState.Success) {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         val metricModifier = Modifier.weight(1f).fillMaxHeight()
-        MetricCard("Orders", data.pendingOrdersCount, "Pending", Icons.Default.ShoppingCart, TraditionalPrimary, metricModifier)
-        MetricCard("Alerts", data.alertsCount, "Attention", Icons.Default.Notifications, SunsetClay, metricModifier)
-        MetricCard("Status", "Active", "Verified", Icons.Default.CheckCircle, TraditionalSecondary, metricModifier)
+        MetricCard("Active Orders", data.pendingOrdersCount, Icons.Default.Inventory, LeaderPrimary, metricModifier)
+        MetricCard("Pending Alerts", data.alertsCount, Icons.Default.NotificationsActive, LeaderError, metricModifier)
+        MetricCard("Efficiency", "94%", Icons.AutoMirrored.Filled.TrendingUp, LeaderSecondary, metricModifier)
     }
 }
 
@@ -204,225 +190,160 @@ private fun SummaryMetrics(data: LeaderDashboardUiState.Success) {
 private fun MetricCard(
     label: String,
     value: String,
-    subLabel: String,
     icon: ImageVector,
     color: Color,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = TraditionalSurface,
-        shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, color.copy(alpha = 0.08f))
+        shape = RoundedCornerShape(16.dp),
+        color = LeaderSurface,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.06f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = color.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = label.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 8.sp, letterSpacing = 1.sp)
-            Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = CharcoalInk.copy(alpha = 0.9f))
-            Text(text = subLabel, style = MaterialTheme.typography.labelSmall, color = color.copy(alpha = 0.6f), fontSize = 8.sp)
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = CharcoalInk)
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
         }
     }
 }
 
 @Composable
-private fun OperationsSection(
+private fun OperationsGrid(
     onAddProduct: () -> Unit,
     onOpenOrders: () -> Unit,
     onOpenInventory: () -> Unit
 ) {
     Column {
-        Text("Operations", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = BarkBrown)
+        Text("Primary Operations", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = LeaderPrimary)
         Spacer(modifier = Modifier.height(12.dp))
         
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            OperationCard(
-                title = "Add Product",
-                desc = "List new produce",
-                icon = Icons.Default.Add,
+            OperationActionCard(
+                title = "List Produce",
+                icon = Icons.Default.PostAdd,
                 onClick = onAddProduct,
+                color = LeaderPrimary,
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
-            OperationCard(
-                title = "Manage Orders",
-                desc = "Customer requests",
-                icon = Icons.Default.Storefront,
+            OperationActionCard(
+                title = "Order Logs",
+                icon = Icons.AutoMirrored.Filled.ReceiptLong,
                 onClick = onOpenOrders,
+                color = LeaderSecondary,
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        OperationCard(
-            title = "Inventory & Stock",
-            desc = "Track and manage cooperative stock",
-            icon = Icons.Default.Inventory2,
+        Spacer(modifier = Modifier.height(12.dp))
+        OperationActionCard(
+            title = "Inventory Warehouse",
+            icon = Icons.Default.Warehouse,
             onClick = onOpenInventory,
+            color = LeaderSecondary,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
 @Composable
-private fun OperationCard(
+private fun OperationActionCard(
     title: String,
-    desc: String,
     icon: ImageVector,
     onClick: () -> Unit,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = TraditionalSurface,
-        shadowElevation = 1.5.dp,
-        border = BorderStroke(1.dp, ClayBorder.copy(alpha = 0.5f))
+        shape = RoundedCornerShape(16.dp),
+        color = color,
+        contentColor = Color.White,
+        shadowElevation = 4.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.2f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier.size(32.dp).background(TraditionalBackground, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(icon, contentDescription = null, tint = TraditionalPrimary.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
-                }
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight, 
-                    contentDescription = null, 
-                    tint = TraditionalPrimary.copy(alpha = 0.3f),
-                    modifier = Modifier.size(18.dp)
-                )
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = CharcoalInk)
-            Text(desc, style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp)
+            Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Color.White)
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.5f))
         }
     }
 }
 
 @Composable
-private fun AnalyticsInsightsStrip(onClick: () -> Unit) {
+private fun InsightsCard(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = TraditionalBackground,
-        border = BorderStroke(1.dp, ClayBorder.copy(alpha = 0.5f))
+        color = LeaderHighlight,
+        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.1f))
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.BarChart, contentDescription = null, tint = AmberHarvest.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(12.dp))
+            Icon(Icons.Default.Insights, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Performance Insights", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = BarkBrown)
-                Text("Monitor marketplace trends", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 10.sp)
+                Text("Cooperative Insights", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = LeaderPrimary)
+                Text("Review demand forecasting and harvest data", style = MaterialTheme.typography.labelSmall, color = LeaderSecondary.copy(alpha = 0.7f))
             }
-            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, tint = AmberHarvest.copy(alpha = 0.5f), modifier = Modifier.size(14.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(16.dp))
         }
     }
 }
 
 @Composable
-private fun SavedDraftsSection(drafts: List<Product>, onEditDraft: (String) -> Unit) {
+private fun DraftsSection(drafts: List<Product>, onEditDraft: (String) -> Unit) {
     Column {
-        Text("Saved Drafts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = BarkBrown)
+        Text("Pending Drafts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = LeaderPrimary)
         Spacer(modifier = Modifier.height(12.dp))
         
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            drafts.take(2).forEach { draft ->
-                DraftCardItem(draft, onEditDraft)
+            drafts.forEach { draft ->
+                DraftItem(draft, onEditDraft)
             }
         }
     }
 }
 
 @Composable
-private fun DraftCardItem(product: Product, onEditDraft: (String) -> Unit) {
+private fun DraftItem(product: Product, onEditDraft: (String) -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = TraditionalSurface,
-        shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.1f))
+        shape = RoundedCornerShape(12.dp),
+        color = LeaderSurface,
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = TraditionalBackground
-            ) {
-                AsyncImage(
-                    model = product.imageUrls.firstOrNull(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
+            Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(LeaderBackground)) {
+                AsyncImage(model = product.imageUrls.firstOrNull(), contentDescription = null, contentScale = ContentScale.Crop)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = CharcoalInk)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Draft", style = MaterialTheme.typography.labelSmall, color = AmberHarvest, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Last edited recently", style = MaterialTheme.typography.labelSmall, color = Color.LightGray, fontSize = 9.sp)
-                }
+                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = CharcoalInk)
+                Text("Last saved: ${product.lastModifiedAt}", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
-            
-            IconButton(
-                onClick = { onEditDraft(product.productId) },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TraditionalPrimary.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun EarthyMarketInsight() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = TraditionalSecondary.copy(alpha = 0.04f),
-        border = BorderStroke(1.dp, TraditionalSecondary.copy(alpha = 0.1f))
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(36.dp).background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = TraditionalSecondary.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text("Market Pulse", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TraditionalSecondary)
-                Text(
-                    text = "Honey interest is rising in nearby clusters.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = CharcoalInk.copy(alpha = 0.7f),
-                    fontSize = 11.sp
-                )
+            TextButton(onClick = { onEditDraft(product.productId) }) {
+                Text("RESUME", fontWeight = FontWeight.Bold, color = LeaderPrimary)
             }
         }
     }

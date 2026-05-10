@@ -1,5 +1,8 @@
 package com.budakattu.sante.data.repository
 
+import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -9,25 +12,21 @@ import com.budakattu.sante.data.remote.firebase.UserProfileDocument
 import com.budakattu.sante.domain.model.SessionState
 import com.budakattu.sante.domain.model.UserRole
 import com.budakattu.sante.domain.repository.SessionRepository
-import androidx.credentials.ClearCredentialStateRequest
-import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import android.content.Context
-import android.net.Uri
-import androidx.core.net.toUri
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class FirebaseSessionRepository @Inject constructor(
@@ -69,7 +68,18 @@ class FirebaseSessionRepository @Inject constructor(
                             trySend(
                                 SessionState.LoggedIn(
                                     userId = user.uid,
-                                    name = profile.name.ifBlank { user.email.orEmpty() },
+                                    name = profile.name.ifBlank { user.displayName ?: user.email.orEmpty() },
+                                    email = profile.email.ifBlank { user.email.orEmpty() },
+                                    phoneNumber = profile.phoneNumber,
+                                    alternatePhoneNumber = profile.alternatePhoneNumber,
+                                    address = profile.address,
+                                    landmark = profile.landmark,
+                                    city = profile.city,
+                                    district = profile.district,
+                                    state = profile.state,
+                                    pincode = profile.pincode,
+                                    preferredLanguage = profile.preferredLanguage,
+                                    deliveryInstructions = profile.deliveryInstructions,
                                     role = profile.role.toUserRole(),
                                     profilePictureUrl = profile.profilePictureUrl,
                                     cooperativeId = profile.cooperativeId,
@@ -112,7 +122,7 @@ class FirebaseSessionRepository @Inject constructor(
         var finalProfilePictureUrl: String? = null
         if (profilePictureUri != null) {
             val storageRef = storage.reference.child("profiles/${firebaseUser.uid}.jpg")
-            awaitTask { storageRef.putFile(profilePictureUri.toUri()) }
+            awaitTask { storageRef.putFile(android.net.Uri.parse(profilePictureUri)) }
             finalProfilePictureUrl = awaitTask { storageRef.downloadUrl }.toString()
         }
 
@@ -138,6 +148,41 @@ class FirebaseSessionRepository @Inject constructor(
         }
     }
 
+    override suspend fun updateProfile(
+        name: String,
+        phoneNumber: String,
+        alternatePhoneNumber: String,
+        address: String,
+        landmark: String,
+        city: String,
+        district: String,
+        state: String,
+        pincode: String,
+        preferredLanguage: String,
+        deliveryInstructions: String,
+    ) {
+        val user = firebaseAuth.currentUser ?: throw IllegalStateException("Not signed in")
+        val updates = mapOf(
+            "name" to name,
+            "phoneNumber" to phoneNumber,
+            "alternatePhoneNumber" to alternatePhoneNumber,
+            "address" to address,
+            "landmark" to landmark,
+            "city" to city,
+            "district" to district,
+            "state" to state,
+            "pincode" to pincode,
+            "preferredLanguage" to preferredLanguage,
+            "deliveryInstructions" to deliveryInstructions,
+            "updatedAt" to System.currentTimeMillis()
+        )
+        awaitTask {
+            firestore.collection(FirestorePaths.USERS)
+                .document(user.uid)
+                .update(updates)
+        }
+    }
+
     override suspend fun signOut() {
         firebaseAuth.signOut()
         runCatching {
@@ -150,10 +195,14 @@ class FirebaseSessionRepository @Inject constructor(
             block()
                 .addOnSuccessListener { result ->
                     if (continuation.isActive) {
-                        continuation.resumeWith(Result.success(result))
+                        continuation.resume(result)
                     }
                 }
-                .addOnFailureListener { continuation.resumeWithException(it) }
+                .addOnFailureListener {
+                    if (continuation.isActive) {
+                        continuation.resumeWithException(it)
+                    }
+                }
         }
     }
 

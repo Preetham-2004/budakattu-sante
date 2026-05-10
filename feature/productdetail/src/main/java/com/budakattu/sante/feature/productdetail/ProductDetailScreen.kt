@@ -296,7 +296,9 @@ private fun DetailContent(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ForestPrimary,
-                        disabledContainerColor = ForestPrimary.copy(alpha = 0.5f)
+                        contentColor = Color.White,
+                        disabledContainerColor = ForestPrimary.copy(alpha = 0.5f),
+                        disabledContentColor = Color.White.copy(alpha = 0.5f)
                     ),
                     enabled = !state.isProcessingPayment && product.ctaLabel != "Unavailable"
                 ) {

@@ -2,17 +2,32 @@ package com.budakattu.sante.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Subtle Traditional Palette
+// Management & Unified Brand Palette (Copper & Stone)
+val LeaderPrimary = Color(0xFF8D5E44) // Deep Earthy Copper
+val LeaderSecondary = Color(0xFF53606B) // Professional Stone Blue
+val LeaderAccent = Color(0xFFD4A373) // Warm Ochre
+val LeaderSurface = Color(0xFFFFFFFF)
+val LeaderBackground = Color(0xFFF7F6F2) // Very soft warm grey
+val LeaderHighlight = Color(0xFFE9EDC9) // Soft sage highlight
+val LeaderError = Color(0xFFBC4749)
+
+// Legacy compatibility names
+val Parchment = LeaderBackground
 val SageMuted = Color(0xFF7D8C69)
 val ClayMuted = Color(0xFFB68D7E)
 val StoneWarm = Color(0xFFA49382)
 val IvorySoft = Color(0xFFFBF9F4)
 val GoldSubtle = Color(0xFFC5A059)
 
-val ForestPrimary = SageMuted
-val LeafAccent = Color(0xFF94A684)
-val AmberHarvest = GoldSubtle
-val Parchment = IvorySoft
+// Core Brand Aliases (Applied to all roles)
+val ForestPrimary = LeaderPrimary
+val TraditionalPrimary = LeaderPrimary
+val TraditionalSecondary = LeaderSecondary
+val LeafAccent = LeaderSecondary
+val AmberHarvest = LeaderAccent
+val TraditionalBackground = LeaderBackground
+val ForestBackground = LeaderBackground
+val TraditionalSurface = LeaderSurface
 val MossSurface = Color(0xFFFFFFFF)
 val BarkBrown = Color(0xFF5D544F)
 val CharcoalInk = Color(0xFF4A4A4A)
@@ -23,20 +38,15 @@ val MistVeil = Color(0xFFF2F0EB)
 val MspSafe = Color(0xFF6B7B56)
 val MspDanger = Color(0xFFBD7D7D)
 
-// Accents (Subtle versions)
-val SunsetClay = ClayMuted
+// Accents
+val SunsetClay = LeaderPrimary
 val DeepForest = Color(0xFF4A523D)
-val GoldLustre = GoldSubtle
+val GoldLustre = LeaderAccent
 val GlassWhite = Color(0xAAFFFFFF)
 val ShadowBrown = Color(0x08000000)
 val SoftMoss = Color(0xFFECF0E6)
 
-// Aliases
-val TraditionalPrimary = ForestPrimary
-val TraditionalSecondary = LeafAccent
-val TraditionalBackground = Parchment
-val TraditionalSurface = MossSurface
-val ForestBackground = TraditionalBackground
-val ForestMedium = LeafAccent
-val ForestLight = Color(0xFFC6D0C0)
-val DeepSlate = BarkBrown
+// Supporting Greys
+val TextDark = CharcoalInk
+val TextMuted = Color(0xFF6C757D)
+val DividerColor = Color(0xFFEAE0D5)

@@ -32,14 +32,27 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,14 +75,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
 import com.budakattu.sante.core.ui.components.RouteBadge
-import com.budakattu.sante.core.ui.theme.AmberHarvest
-import com.budakattu.sante.core.ui.theme.BarkBrown
-import com.budakattu.sante.core.ui.theme.CharcoalInk
-import com.budakattu.sante.core.ui.theme.ClayBorder
-import com.budakattu.sante.core.ui.theme.ForestPrimary
-import com.budakattu.sante.core.ui.theme.LeafAccent
-import com.budakattu.sante.core.ui.theme.MilletGold
-import com.budakattu.sante.core.ui.theme.Parchment
+import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.SessionState
 import com.budakattu.sante.domain.model.UserRole
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -117,11 +123,11 @@ fun SplashRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ForestCard {
-                Text("Budakattu-Sante", style = MaterialTheme.typography.headlineMedium)
+                Text("Budakattu-Sante", style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text("Traditional value. Modern market access.")
                 Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = LeaderPrimary)
             }
         }
     }
@@ -134,7 +140,7 @@ fun OnboardingScreen(
 ) {
     ContentFrame {
         ForestCard {
-            Text("Forest-to-home marketplace", style = MaterialTheme.typography.headlineMedium)
+            Text("Forest-to-home marketplace", style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary)
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 "Browse traceable forest products, support fair trade, and keep cooperative workflows reliable offline.",
@@ -142,18 +148,22 @@ fun OnboardingScreen(
             )
             Spacer(modifier = Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                RouteBadge(label = "Access", value = "Buyer + Leader")
-                RouteBadge(label = "Mode", value = "Offline-ready")
+                RouteBadge(label = "Access", value = "Buyer + Leader", color = LeaderPrimary)
+                RouteBadge(label = "Mode", value = "Offline-ready", color = LeaderSecondary)
             }
             Spacer(modifier = Modifier.height(20.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = LeaderPrimary,
+                    contentColor = Color.White
+                ),
                 onClick = {
                     viewModel.completeOnboarding()
                     onContinue()
                 },
             ) {
-                Text("Continue")
+                Text("Continue", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -230,7 +240,7 @@ private fun AuthForm(
 
     ContentFrame {
         ForestCard {
-            Text(title, style = MaterialTheme.typography.headlineMedium)
+            Text(title, style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary)
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = if (showNameField) {
@@ -280,13 +290,17 @@ private fun AuthForm(
             Spacer(modifier = Modifier.height(20.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = LeaderPrimary,
+                    contentColor = Color.White
+                ),
                 enabled = !uiState.isLoading,
                 onClick = onPrimaryAction,
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Color.White)
                 } else {
-                    Text(buttonLabel)
+                    Text(buttonLabel, fontWeight = FontWeight.Bold)
                 }
             }
             if (showGoogleButton) {
@@ -345,7 +359,7 @@ private fun LoginExperience(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFFFFBF5), Color(0xFFF7EDDB), Color(0xFFFFFBF5)),
+                    colors = listOf(LeaderBackground, Color(0xFFECEAE0), LeaderBackground),
                 ),
             ),
     ) {
@@ -363,7 +377,7 @@ private fun LoginExperience(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = Color(0xFFFFFCF7),
+                color = Color.White,
                 tonalElevation = 2.dp,
                 shadowElevation = 8.dp,
             ) {
@@ -377,19 +391,19 @@ private fun LoginExperience(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(18.dp),
-                            color = Color(0xFFF0F5E5),
+                            color = LeaderHighlight.copy(alpha = 0.4f),
                             modifier = Modifier.size(44.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Outlined.AccountCircle,
                                     contentDescription = null,
-                                    tint = ForestPrimary,
+                                    tint = LeaderPrimary,
                                 )
                             }
                         }
                         Column {
-                            Text("Login", style = MaterialTheme.typography.headlineMedium, color = ForestPrimary)
+                            Text("Login", style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary, fontWeight = FontWeight.Bold)
                             Text(
                                 "Secure your entry into a premium tribal marketplace.",
                                 style = MaterialTheme.typography.bodyLarge,
@@ -410,7 +424,7 @@ private fun LoginExperience(
                             Icon(
                                 imageVector = Icons.Outlined.Email,
                                 contentDescription = null,
-                                tint = BarkBrown,
+                                tint = LeaderSecondary.copy(alpha = 0.6f),
                             )
                         },
                     )
@@ -428,14 +442,14 @@ private fun LoginExperience(
                             Icon(
                                 imageVector = Icons.Outlined.Lock,
                                 contentDescription = null,
-                                tint = BarkBrown,
+                                tint = LeaderSecondary.copy(alpha = 0.6f),
                             )
                         },
                         trailingIcon = {
                             Icon(
                                 imageVector = Icons.Outlined.Visibility,
                                 contentDescription = null,
-                                tint = BarkBrown.copy(alpha = 0.7f),
+                                tint = LeaderSecondary.copy(alpha = 0.4f),
                             )
                         },
                     )
@@ -444,17 +458,17 @@ private fun LoginExperience(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Forgot password?", color = ForestPrimary, style = MaterialTheme.typography.labelLarge)
+                        Text("Forgot password?", color = LeaderPrimary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            Text("Need help?", color = ForestPrimary, style = MaterialTheme.typography.labelLarge)
+                            Text("Need help?", color = LeaderPrimary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                             Icon(
                                 imageVector = Icons.Outlined.HelpOutline,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = ForestPrimary,
+                                tint = LeaderPrimary,
                             )
                         }
                     }
@@ -469,12 +483,16 @@ private fun LoginExperience(
                             .height(52.dp),
                         enabled = !uiState.isLoading,
                         shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LeaderPrimary,
+                            contentColor = Color.White
+                        ),
                         onClick = onPrimaryAction,
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp))
                         } else {
-                            Text("Enter Marketplace")
+                            Text("Enter Marketplace", fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -484,7 +502,7 @@ private fun LoginExperience(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         HorizontalDivider(modifier = Modifier.weight(1f))
-                        Text("OR", style = MaterialTheme.typography.labelLarge, color = BarkBrown)
+                        Text("OR", style = MaterialTheme.typography.labelLarge, color = LeaderSecondary.copy(alpha = 0.6f))
                         HorizontalDivider(modifier = Modifier.weight(1f))
                     }
 
@@ -493,7 +511,7 @@ private fun LoginExperience(
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, ClayBorder),
+                        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.2f)),
                         enabled = !uiState.isLoading,
                         onClick = {
                             val activity = context.findActivity() ?: run {
@@ -519,7 +537,7 @@ private fun LoginExperience(
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, ClayBorder),
+                        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.2f)),
                         onClick = onSecondaryAction,
                     ) {
                         Icon(
@@ -540,12 +558,13 @@ private fun LoginExperience(
                             imageVector = Icons.Outlined.Eco,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = ForestPrimary,
+                            tint = LeaderPrimary,
                         )
                         Text(
                             "Your data is safe with us. We value your trust.",
                             style = MaterialTheme.typography.labelLarge,
-                            color = ForestPrimary,
+                            color = LeaderPrimary,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -570,7 +589,7 @@ private fun SignupExperience(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFFFFBF5), Color(0xFFF7EDDB), Color(0xFFFFFBF5)),
+                    colors = listOf(LeaderBackground, Color(0xFFECEAE0), LeaderBackground),
                 ),
             ),
     ) {
@@ -586,13 +605,13 @@ private fun SignupExperience(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             WelcomePanel(
-                title = "Create your account",
+                title = "Create account",
                 subtitle = "Join the forest marketplace and begin your trusted route into tribal products.",
             )
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = Color(0xFFFFFCF7),
+                color = Color.White,
                 tonalElevation = 2.dp,
                 shadowElevation = 8.dp,
             ) {
@@ -606,19 +625,19 @@ private fun SignupExperience(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(18.dp),
-                            color = Color(0xFFF0F5E5),
+                            color = LeaderHighlight.copy(alpha = 0.4f),
                             modifier = Modifier.size(44.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Outlined.AccountCircle,
                                     contentDescription = null,
-                                    tint = ForestPrimary,
+                                    tint = LeaderPrimary,
                                 )
                             }
                         }
                         Column {
-                            Text("Create account", style = MaterialTheme.typography.headlineMedium, color = ForestPrimary)
+                            Text("Join us", style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary, fontWeight = FontWeight.Bold)
                             Text(
                                 "Set up your marketplace access in a few quick steps.",
                                 style = MaterialTheme.typography.bodyLarge,
@@ -639,7 +658,7 @@ private fun SignupExperience(
                             Icon(
                                 imageVector = Icons.Outlined.AccountCircle,
                                 contentDescription = null,
-                                tint = BarkBrown,
+                                tint = LeaderSecondary.copy(alpha = 0.6f),
                             )
                         },
                     )
@@ -663,7 +682,7 @@ private fun SignupExperience(
                             Icon(
                                 imageVector = Icons.Outlined.Email,
                                 contentDescription = null,
-                                tint = BarkBrown,
+                                tint = LeaderSecondary.copy(alpha = 0.6f),
                             )
                         },
                     )
@@ -681,7 +700,7 @@ private fun SignupExperience(
                             Icon(
                                 imageVector = Icons.Outlined.Lock,
                                 contentDescription = null,
-                                tint = BarkBrown,
+                                tint = LeaderSecondary.copy(alpha = 0.6f),
                             )
                         },
                     )
@@ -702,12 +721,16 @@ private fun SignupExperience(
                             .height(52.dp),
                         enabled = !uiState.isLoading,
                         shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LeaderPrimary,
+                            contentColor = Color.White
+                        ),
                         onClick = onPrimaryAction,
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp))
                         } else {
-                            Text("Create account")
+                            Text("Create account", fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -716,7 +739,7 @@ private fun SignupExperience(
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, ClayBorder),
+                        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.2f)),
                         onClick = onSecondaryAction,
                     ) {
                         Text("Already have an account", color = CharcoalInk)
@@ -746,7 +769,7 @@ private fun ProfileImagePicker(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFF0F5E5))
+                .background(LeaderHighlight.copy(alpha = 0.3f))
                 .clickable { launcher.launch("image/*") },
             contentAlignment = Alignment.Center
         ) {
@@ -761,7 +784,7 @@ private fun ProfileImagePicker(
                 Icon(
                     imageVector = Icons.Outlined.PhotoCamera,
                     contentDescription = "Select Photo",
-                    tint = ForestPrimary,
+                    tint = LeaderPrimary,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -770,7 +793,8 @@ private fun ProfileImagePicker(
         Text(
             text = if (imageUrl.isEmpty()) "Tap to upload profile picture" else "Change photo",
             style = MaterialTheme.typography.labelLarge,
-            color = ForestPrimary
+            color = LeaderPrimary,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -780,18 +804,33 @@ private fun RoleSelector(
     selectedRole: UserRole,
     onRoleSelected: (UserRole) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             onClick = { onRoleSelected(UserRole.BUYER) },
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = if (selectedRole == UserRole.BUYER) LeaderPrimary.copy(alpha = 0.1f) else Color.Transparent,
+                contentColor = if (selectedRole == UserRole.BUYER) LeaderPrimary else LeaderSecondary
+            ),
+            border = BorderStroke(1.dp, if (selectedRole == UserRole.BUYER) LeaderPrimary else LeaderSecondary.copy(alpha = 0.3f))
         ) {
-            Text(if (selectedRole == UserRole.BUYER) "Buyer selected" else "Continue as Buyer")
+            Text(if (selectedRole == UserRole.BUYER) "BUYER ✓" else "BUYER", fontWeight = FontWeight.Bold)
         }
         OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             onClick = { onRoleSelected(UserRole.LEADER) },
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = if (selectedRole == UserRole.LEADER) LeaderPrimary.copy(alpha = 0.1f) else Color.Transparent,
+                contentColor = if (selectedRole == UserRole.LEADER) LeaderPrimary else LeaderSecondary
+            ),
+            border = BorderStroke(1.dp, if (selectedRole == UserRole.LEADER) LeaderPrimary else LeaderSecondary.copy(alpha = 0.3f))
         ) {
-            Text(if (selectedRole == UserRole.LEADER) "Leader selected" else "Continue as Leader")
+            Text(if (selectedRole == UserRole.LEADER) "LEADER ✓" else "LEADER", fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -809,38 +848,24 @@ private fun BrandHeader() {
         ) {
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = Color(0xFFE8E2C6),
-                border = BorderStroke(1.dp, ClayBorder),
+                color = LeaderHighlight,
+                border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.1f)),
                 modifier = Modifier.size(46.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Outlined.Eco,
                         contentDescription = null,
-                        tint = ForestPrimary,
+                        tint = LeaderPrimary,
                     )
                 }
             }
             Column {
-                Text("BUDAKATTU SANTE", style = MaterialTheme.typography.titleLarge, color = ForestPrimary)
+                Text("BUDAKATTU SANTE", style = MaterialTheme.typography.titleLarge, color = LeaderPrimary, fontWeight = FontWeight.Black)
                 Text(
                     "Forest-to-Home Tribal Marketplace",
                     style = MaterialTheme.typography.labelLarge,
-                    color = CharcoalInk.copy(alpha = 0.75f),
-                )
-            }
-        }
-        Surface(
-            shape = CircleShape,
-            color = Color(0xFFFFF2D8),
-            modifier = Modifier.size(44.dp),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Outlined.Storefront,
-                    contentDescription = null,
-                    modifier = Modifier.size(26.dp),
-                    tint = AmberHarvest,
+                    color = LeaderSecondary.copy(alpha = 0.75f),
                 )
             }
         }
@@ -855,7 +880,7 @@ private fun WelcomePanel(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = ForestPrimary,
+        color = LeaderPrimary,
         shadowElevation = 6.dp,
     ) {
         Column(
@@ -871,24 +896,24 @@ private fun WelcomePanel(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Text(title, style = MaterialTheme.typography.headlineMedium, color = Parchment)
+                    Text(title, style = MaterialTheme.typography.headlineMedium, color = Color.White, fontWeight = FontWeight.Black)
                     Text(
                         subtitle,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Parchment.copy(alpha = 0.92f),
+                        color = Color.White.copy(alpha = 0.92f),
                     )
                 }
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = AmberHarvest.copy(alpha = 0.14f),
-                    modifier = Modifier.size(78.dp),
+                    color = Color.White.copy(alpha = 0.15f),
+                    modifier = Modifier.size(72.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Outlined.Eco,
                             contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MilletGold,
+                            modifier = Modifier.size(36.dp),
+                            tint = Color.White,
                         )
                     }
                 }
@@ -920,7 +945,7 @@ private fun InfoBadge(
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = LeafAccent.copy(alpha = 0.22f),
+        color = Color.White.copy(alpha = 0.1f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -931,11 +956,11 @@ private fun InfoBadge(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = Parchment.copy(alpha = 0.92f),
+                tint = Color.White.copy(alpha = 0.8f),
             )
             Column {
-                Text(label, style = MaterialTheme.typography.labelLarge, color = Parchment.copy(alpha = 0.8f))
-                Text(value, style = MaterialTheme.typography.titleLarge, color = Parchment)
+                Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
+                Text(value, style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Black)
             }
         }
     }
@@ -943,7 +968,7 @@ private fun InfoBadge(
 
 @Composable
 private fun LoginFieldLabel(text: String) {
-    Text(text = text, style = MaterialTheme.typography.labelLarge, color = BarkBrown)
+    Text(text = text, style = MaterialTheme.typography.labelLarge, color = LeaderSecondary, fontWeight = FontWeight.Bold)
 }
 
 @Composable
@@ -958,14 +983,14 @@ private fun LoginBackgroundAccent() {
                 .align(Alignment.TopEnd)
                 .size(120.dp)
                 .clip(RoundedCornerShape(34.dp))
-                .background(MilletGold.copy(alpha = 0.12f)),
+                .background(LeaderAccent.copy(alpha = 0.08f)),
         )
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .size(148.dp)
                 .clip(RoundedCornerShape(topStart = 90.dp))
-                .background(AmberHarvest.copy(alpha = 0.08f)),
+                .background(LeaderPrimary.copy(alpha = 0.05f)),
         )
     }
 }
@@ -975,8 +1000,8 @@ private fun ContentFrame(
     content: @Composable () -> Unit,
 ) {
     HeritageScaffold(
-        title = "Enter The Trading Circle",
-        subtitle = "Use a secure path into the marketplace shaped for forest cooperatives and urban buyers.",
+        title = "Access Gateway",
+        subtitle = "Secure path into the marketplace for forest cooperatives and buyers.",
     ) { innerPadding ->
         Column(
             modifier = Modifier
