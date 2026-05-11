@@ -23,6 +23,8 @@ data class ProductDetailUi(
     val description: String,
     val audioDescription: String,
     val priceLabel: String,
+    val pricePerUnit: Float,
+    val unit: String,
     val mspLabel: String,
     val isMspSafe: Boolean,
     val stockLabel: String,

@@ -389,7 +389,10 @@ private fun CartScreen(
                             Button(
                                 onClick = { onDecrease(item.itemId, item.quantity) },
                                 modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ForestPrimary,
+                                    contentColor = Color.White
+                                ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text("-", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -397,7 +400,10 @@ private fun CartScreen(
                             Button(
                                 onClick = { onIncrease(item.itemId, item.quantity) },
                                 modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ForestPrimary,
+                                    contentColor = Color.White
+                                ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text("+", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -405,7 +411,10 @@ private fun CartScreen(
                             Button(
                                 onClick = { onRemove(item.itemId) },
                                 modifier = Modifier.weight(1.5f),
-                                colors = ButtonDefaults.buttonColors(containerColor = ForestPrimary),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ForestPrimary,
+                                    contentColor = Color.White
+                                ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text("Remove", fontWeight = FontWeight.Bold)

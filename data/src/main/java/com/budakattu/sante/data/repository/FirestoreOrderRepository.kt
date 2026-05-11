@@ -1,6 +1,7 @@
 package com.budakattu.sante.data.repository
 
 import com.budakattu.sante.data.remote.firebase.CartDocument
+import com.budakattu.sante.data.remote.firebase.CartItemDocument
 import com.budakattu.sante.data.remote.firebase.FirestorePaths
 import com.budakattu.sante.data.remote.firebase.OrderDocument
 import com.budakattu.sante.data.remote.firebase.OrderItemDocument
@@ -55,7 +56,7 @@ class FirestoreOrderRepository @Inject constructor(
                     Cart(
                         userId = cart?.userId.orEmpty().ifBlank { userId },
                         items = latestItems,
-                        totalItems = cart?.totalItems?.toInt() ?: latestItems.sumOf { it.quantity },
+                        totalItems = latestItems.sumOf { it.quantity },
                         updatedAt = cart?.updatedAt ?: 0L,
                     ),
                 )
@@ -108,13 +109,13 @@ class FirestoreOrderRepository @Inject constructor(
 
                 validateCartQuantity(product, quantity)
 
-                val cartItem = transaction.get(itemRef).toObject(OrderItemDocument::class.java)
+                val cartItem = transaction.get(itemRef).toObject(CartItemDocument::class.java)
                 val newQuantity = (cartItem?.quantity ?: 0).toInt() + quantity
 
                 if (cartItem == null) {
                     transaction.set(
                         itemRef,
-                        OrderItemDocument(
+                        CartItemDocument(
                             itemId = productId,
                             productId = productId,
                             productName = product.name,
@@ -176,7 +177,7 @@ class FirestoreOrderRepository @Inject constructor(
 
         val itemsSnapshot = awaitTask { itemsRef.get() }
         val items = itemsSnapshot.documents.mapNotNull { 
-            it.toObject(OrderItemDocument::class.java) 
+            it.toObject(CartItemDocument::class.java)
         }
 
         if (items.isEmpty()) throw IllegalStateException("Cart is empty")

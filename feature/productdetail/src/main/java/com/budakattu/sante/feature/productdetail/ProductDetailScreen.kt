@@ -79,7 +79,8 @@ fun ProductDetailRoute(
                 viewModel.onAudioDescriptionClick()
             }
         },
-        onPaymentClick = viewModel::onPaymentClick
+        onPaymentClick = viewModel::onPaymentClick,
+        onAddToCartClick = viewModel::addToCart
     )
 }
 
@@ -90,6 +91,7 @@ fun ProductDetailScreen(
     onBack: () -> Unit,
     onAudioDescriptionClick: () -> Unit,
     onPaymentClick: (Int) -> Unit,
+    onAddToCartClick: (Int) -> Unit,
 ) {
     HeritageScaffold(
         title = "Product Detail",
@@ -110,6 +112,7 @@ fun ProductDetailScreen(
                     innerPadding = innerPadding,
                     onAudioDescriptionClick = onAudioDescriptionClick,
                     onPaymentClick = onPaymentClick,
+                    onAddToCartClick = onAddToCartClick,
                 )
             }
         }
@@ -143,9 +146,11 @@ private fun DetailContent(
     innerPadding: PaddingValues,
     onAudioDescriptionClick: () -> Unit,
     onPaymentClick: (Int) -> Unit,
+    onAddToCartClick: (Int) -> Unit,
 ) {
     val product = state.product
     var quantity by remember(product.id) { mutableIntStateOf(1) }
+    val totalPrice = product.pricePerUnit * quantity
     
     LazyColumn(
         modifier = Modifier
@@ -195,11 +200,19 @@ private fun DetailContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = product.priceLabel,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = SunsetClay
-                    )
+                    Column {
+                        Text(
+                            text = "Rs ${totalPrice.toInt()}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = SunsetClay,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "Total for $quantity ${product.unit}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
                     MspBadge(isSafe = product.isMspSafe)
                 }
             }
@@ -274,21 +287,50 @@ private fun DetailContent(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(
                             onClick = { if (quantity > 1) quantity -= 1 },
-                            modifier = Modifier.size(36.dp).background(ForestBackground, CircleShape)
-                        ) { Icon(Icons.Default.Remove, contentDescription = null) }
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(MistVeil)
+                                .border(1.dp, ForestPrimary.copy(alpha = 0.2f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Remove, contentDescription = null, tint = ForestPrimary)
+                        }
                         Text(
                             text = quantity.toString(),
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            style = MaterialTheme.typography.titleLarge
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = CharcoalInk
                         )
                         IconButton(
                             onClick = { quantity += 1 },
-                            modifier = Modifier.size(36.dp).background(ForestBackground, CircleShape)
-                        ) { Icon(Icons.Default.Add, contentDescription = null) }
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(MistVeil)
+                                .border(1.dp, ForestPrimary.copy(alpha = 0.2f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, tint = ForestPrimary)
+                        }
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(24.dp))
+                
+                OutlinedButton(
+                    onClick = { onAddToCartClick(quantity) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(2.dp, ForestPrimary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ForestPrimary),
+                    enabled = product.ctaLabel != "Unavailable"
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("ADD TO CART", fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 Button(
                     onClick = { onPaymentClick(quantity) },

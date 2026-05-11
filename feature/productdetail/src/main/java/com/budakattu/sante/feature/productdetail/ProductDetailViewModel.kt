@@ -80,6 +80,8 @@ class ProductDetailViewModel @Inject constructor(
                                         description = product.description,
                                         audioDescription = product.audioDescription,
                                         priceLabel = "Rs ${product.pricePerUnit.toInt()} per ${product.unit}",
+                                        pricePerUnit = product.pricePerUnit,
+                                        unit = product.unit,
                                         mspLabel = "MSP Rs ${product.mspPerUnit.toInt()} per ${product.unit}",
                                         isMspSafe = !mspValidator.isBelowMsp(product.pricePerUnit, product.mspPerUnit),
                                         stockLabel = when (product.availability) {
