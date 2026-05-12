@@ -43,8 +43,7 @@ import com.budakattu.sante.domain.model.OrderStatus
 fun BuyerOrdersRoute(
     activeRoute: String,
     marketRoute: String,
-    heritageRoute: String,
-    ordersRoute: String,
+    cartRoute: String,
     profileRoute: String,
     onNavigate: (String) -> Unit,
     onOpenCart: () -> Unit,
@@ -67,8 +66,7 @@ fun BuyerOrdersRoute(
                 padding = padding,
                 activeRoute = activeRoute,
                 marketRoute = marketRoute,
-                heritageRoute = heritageRoute,
-                ordersRoute = ordersRoute,
+                cartRoute = cartRoute,
                 profileRoute = profileRoute,
                 onNavigate = onNavigate,
                 onOpenCart = onOpenCart,
@@ -81,6 +79,11 @@ fun BuyerOrdersRoute(
 
 @Composable
 fun CartRoute(
+    activeRoute: String,
+    marketRoute: String,
+    cartRoute: String,
+    profileRoute: String,
+    onNavigate: (String) -> Unit,
     onBack: () -> Unit,
     onOpenConfirmation: (String) -> Unit,
     viewModel: CartViewModel = hiltViewModel(),
@@ -113,6 +116,11 @@ fun CartRoute(
                 CartUiState.Empty -> EmptyCartBody(padding, innerPadding, onBack)
                 is CartUiState.Content -> CartScreen(
                     state = state.cart,
+                    activeRoute = activeRoute,
+                    marketRoute = marketRoute,
+                    cartRoute = cartRoute,
+                    profileRoute = profileRoute,
+                    onNavigate = onNavigate,
                     outerPadding = padding,
                     innerPadding = innerPadding,
                     onBack = onBack,
@@ -216,8 +224,7 @@ private fun BuyerOrdersScreen(
     padding: PaddingValues,
     activeRoute: String,
     marketRoute: String,
-    heritageRoute: String,
-    ordersRoute: String,
+    cartRoute: String,
     profileRoute: String,
     onNavigate: (String) -> Unit,
     onOpenCart: () -> Unit,
@@ -236,8 +243,7 @@ private fun BuyerOrdersScreen(
                 activeRoute = activeRoute,
                 onNavigate = onNavigate,
                 marketRoute = marketRoute,
-                heritageRoute = heritageRoute,
-                ordersRoute = ordersRoute,
+                cartRoute = cartRoute,
                 profileRoute = profileRoute,
             )
         }
@@ -290,6 +296,11 @@ private fun BuyerOrdersScreen(
 @Composable
 private fun CartScreen(
     state: CartUi,
+    activeRoute: String,
+    marketRoute: String,
+    cartRoute: String,
+    profileRoute: String,
+    onNavigate: (String) -> Unit,
     outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onBack: () -> Unit,
@@ -309,6 +320,16 @@ private fun CartScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item {
+                BuyerRouteStrip(
+                    activeRoute = activeRoute,
+                    onNavigate = onNavigate,
+                    marketRoute = marketRoute,
+                    cartRoute = cartRoute,
+                    profileRoute = profileRoute,
+                )
+            }
+
             item {
                 Button(
                     onClick = onBack,

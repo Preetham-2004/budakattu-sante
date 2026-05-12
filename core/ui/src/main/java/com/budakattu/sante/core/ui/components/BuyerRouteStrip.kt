@@ -17,8 +17,7 @@ fun BuyerRouteStrip(
     activeRoute: String,
     onNavigate: (String) -> Unit,
     marketRoute: String,
-    heritageRoute: String,
-    ordersRoute: String,
+    cartRoute: String,
     profileRoute: String,
 ) {
     FlowRow(
@@ -27,8 +26,7 @@ fun BuyerRouteStrip(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         BuyerRouteButton("Market", marketRoute, activeRoute, onNavigate)
-        BuyerRouteButton("Heritage", heritageRoute, activeRoute, onNavigate)
-        BuyerRouteButton("Orders", ordersRoute, activeRoute, onNavigate)
+        BuyerRouteButton("Cart", cartRoute, activeRoute, onNavigate)
         BuyerRouteButton("Profile", profileRoute, activeRoute, onNavigate)
     }
 }

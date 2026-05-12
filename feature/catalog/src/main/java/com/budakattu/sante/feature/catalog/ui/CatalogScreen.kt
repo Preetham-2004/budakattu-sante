@@ -178,8 +178,7 @@ private fun ProductGrid(
                 activeRoute = "catalog",
                 onNavigate = onOpenRoute,
                 marketRoute = "catalog",
-                heritageRoute = "heritage",
-                ordersRoute = "orders",
+                cartRoute = "cart",
                 profileRoute = "profile",
             )
         }

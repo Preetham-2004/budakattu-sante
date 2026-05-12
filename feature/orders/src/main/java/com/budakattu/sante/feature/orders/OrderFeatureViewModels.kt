@@ -274,10 +274,11 @@ data class LeaderOrderUi(
 private fun Cart?.toUiState(): CartUiState {
     if (this == null || items.isEmpty()) return CartUiState.Empty
     val totalAmount = items.sumOf { it.quantity * it.pricePerUnit.toDouble() }
+    val totalCount = items.sumOf { it.quantity }
     return CartUiState.Content(
         cart = CartUi(
             items = items.map(::toCartItemUi),
-            totalItems = totalItems,
+            totalItems = totalCount,
             totalAmountLabel = "Rs ${totalAmount.toInt()}",
         ),
     )

@@ -64,8 +64,7 @@ fun HeritageRouteScreen(
                 activeRoute = NavRoutes.HERITAGE,
                 onNavigate = onNavigate,
                 marketRoute = NavRoutes.CATALOG,
-                heritageRoute = NavRoutes.HERITAGE,
-                ordersRoute = NavRoutes.ORDERS,
+                cartRoute = NavRoutes.CART,
                 profileRoute = NavRoutes.PROFILE,
             )
 
@@ -294,14 +293,13 @@ private fun DestinationBody(
             .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
         content = {
-            BuyerRouteStrip(
-                activeRoute = activeRoute,
-                onNavigate = onNavigate,
-                marketRoute = NavRoutes.CATALOG,
-                heritageRoute = NavRoutes.HERITAGE,
-                ordersRoute = NavRoutes.ORDERS,
-                profileRoute = NavRoutes.PROFILE,
-            )
+        BuyerRouteStrip(
+            activeRoute = activeRoute,
+            onNavigate = onNavigate,
+            marketRoute = NavRoutes.CATALOG,
+            cartRoute = NavRoutes.CART,
+            profileRoute = NavRoutes.PROFILE,
+        )
             content()
         },
     )

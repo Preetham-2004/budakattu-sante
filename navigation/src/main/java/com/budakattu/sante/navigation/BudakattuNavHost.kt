@@ -113,8 +113,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
             BuyerOrdersRoute(
                 activeRoute = NavRoutes.ORDERS,
                 marketRoute = NavRoutes.CATALOG,
-                heritageRoute = NavRoutes.HERITAGE,
-                ordersRoute = NavRoutes.ORDERS,
+                cartRoute = NavRoutes.CART,
                 profileRoute = NavRoutes.PROFILE,
                 onNavigate = { route ->
                     navController.navigate(route) {
@@ -130,6 +129,15 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
         }
         composable(NavRoutes.CART) {
             CartRoute(
+                activeRoute = NavRoutes.CART,
+                marketRoute = NavRoutes.CATALOG,
+                cartRoute = NavRoutes.CART,
+                profileRoute = NavRoutes.PROFILE,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 onOpenConfirmation = { orderId ->
                     navController.navigate("${NavRoutes.ORDER_CONFIRMATION_PREFIX}/$orderId") {
@@ -170,8 +178,7 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
             BuyerProfileRoute(
                 activeRoute = NavRoutes.PROFILE,
                 marketRoute = NavRoutes.CATALOG,
-                heritageRoute = NavRoutes.HERITAGE,
-                ordersRoute = NavRoutes.ORDERS,
+                cartRoute = NavRoutes.CART,
                 profileRoute = NavRoutes.PROFILE,
                 onNavigate = { route ->
                     navController.navigate(route) {
