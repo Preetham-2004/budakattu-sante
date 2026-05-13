@@ -1,5 +1,9 @@
 package com.budakattu.sante.feature.leader
 
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,8 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,11 +28,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.budakattu.sante.core.ui.components.ForestCard
-import com.budakattu.sante.core.ui.components.LeaderScaffold
-import com.budakattu.sante.core.ui.components.RouteBadge
+import com.budakattu.sante.core.ui.components.*
 import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.Product
+import com.budakattu.sante.feature.leader.SupportChatViewModel
 
 @Composable
 fun LeaderDashboardRoute(
@@ -39,19 +41,53 @@ fun LeaderDashboardRoute(
     onOpenInsights: () -> Unit,
     onEditDraft: (String) -> Unit,
     onSignOut: () -> Unit,
-    viewModel: LeaderDashboardViewModel = hiltViewModel()
+    viewModel: LeaderDashboardViewModel = hiltViewModel(),
+    chatViewModel: SupportChatViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
+    val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
+    var showChat by remember { mutableStateOf(false) }
 
-    LeaderDashboardScreen(
-        uiState = uiState,
-        onAddProduct = onAddProduct,
-        onOpenOrders = onOpenOrders,
-        onOpenInventory = onOpenInventory,
-        onOpenInsights = onOpenInsights,
-        onEditDraft = onEditDraft,
-        onSignOut = onSignOut
-    )
+    val speechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+            if (spokenText != null) {
+                chatViewModel.sendMessage(spokenText)
+            }
+        }
+    }
+
+    Box {
+        LeaderDashboardScreen(
+            uiState = uiState,
+            onAddProduct = onAddProduct,
+            onOpenOrders = onOpenOrders,
+            onOpenInventory = onOpenInventory,
+            onOpenInsights = onOpenInsights,
+            onEditDraft = onEditDraft,
+            onSignOut = onSignOut,
+            onOpenChat = { showChat = true }
+        )
+
+        if (showChat) {
+            SupportChatBottomSheet(
+                onDismissRequest = { showChat = false },
+                onSendMessage = chatViewModel::sendMessage,
+                onVoiceInputClick = {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault())
+                    }
+                    speechLauncher.launch(intent)
+                },
+                messages = chatMessages,
+                isTyping = isTyping
+            )
+        }
+    }
 }
 
 @Composable
@@ -63,10 +99,14 @@ private fun LeaderDashboardScreen(
     onOpenInsights: () -> Unit,
     onEditDraft: (String) -> Unit,
     onSignOut: () -> Unit,
+    onOpenChat: () -> Unit,
 ) {
     LeaderScaffold(
         title = "Cooperative HQ",
         subtitle = "Professional management of tribal harvests & trade.",
+        floatingActionButton = {
+            SupportChatFAB(onClick = onOpenChat)
+        },
         topBarContent = {
             if (uiState is LeaderDashboardUiState.Success) {
                 Row(
@@ -108,6 +148,14 @@ private fun LeaderDashboardScreen(
                     ) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White, modifier = Modifier.size(20.dp))
                     }
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    AudioGuidanceButton(
+                        text = "This is your Cooperative Headquarters. You can list new produce, manage inventory, and view order logs.",
+                        backgroundColor = Color.White.copy(alpha = 0.2f),
+                        tint = Color.White
+                    )
                 }
             }
         }

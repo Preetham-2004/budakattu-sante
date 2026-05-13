@@ -1,6 +1,10 @@
 package com.budakattu.sante.feature.productdetail
 
+import android.content.Intent
+import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,28 +35,45 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.budakattu.sante.core.ui.components.ForestCard
-import com.budakattu.sante.core.ui.components.HeritageScaffold
-import com.budakattu.sante.core.ui.components.HighlightCard
-import com.budakattu.sante.core.ui.components.MspBadge
-import com.budakattu.sante.core.ui.components.RouteBadge
+import com.budakattu.sante.core.ui.components.*
 import com.budakattu.sante.core.ui.theme.*
+import com.budakattu.sante.feature.productdetail.SupportChatViewModel
 import java.util.Locale
 
 @Composable
 fun ProductDetailRoute(
     onBack: () -> Unit,
+    onNavigateToMarket: () -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel(),
+    chatViewModel: SupportChatViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
+    val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
+    
     val snackbarHostState = remember { SnackbarHostState() }
+    var showChat by remember { mutableStateOf(false) }
+    var showPaymentDialog by remember { mutableStateOf(false) }
+    var pendingQuantity by remember { mutableIntStateOf(1) }
+
+    val speechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+            if (spokenText != null) {
+                chatViewModel.sendMessage(spokenText)
+            }
+        }
+    }
+
     val context = LocalContext.current
     val textToSpeech = remember(context) {
         TextToSpeech(context, null)
     }
 
     DisposableEffect(textToSpeech) {
-        textToSpeech.language = Locale.ENGLISH
+        textToSpeech.language = Locale.getDefault()
         onDispose {
             textToSpeech.stop()
             textToSpeech.shutdown()
@@ -60,28 +81,67 @@ fun ProductDetailRoute(
     }
 
     LaunchedEffect(viewModel) {
-        viewModel.events.collect { snackbarHostState.showSnackbar(it) }
+        viewModel.events.collect { event ->
+            when (event) {
+                is ProductDetailEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
+                is ProductDetailEvent.OrderSuccess -> onNavigateToMarket()
+            }
+        }
     }
 
-    ProductDetailScreen(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        onBack = onBack,
-        onAudioDescriptionClick = {
-            val state = uiState as? ProductDetailUiState.Success
-            if (state != null) {
-                textToSpeech.speak(
-                    state.product.audioDescription,
-                    TextToSpeech.QUEUE_FLUSH,
-                    null,
-                    state.product.id,
-                )
-                viewModel.onAudioDescriptionClick()
-            }
-        },
-        onPaymentClick = viewModel::onPaymentClick,
-        onAddToCartClick = viewModel::addToCart
-    )
+    Box {
+        ProductDetailScreen(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            onBack = onBack,
+            onAudioDescriptionClick = {
+                val state = uiState as? ProductDetailUiState.Success
+                if (state != null) {
+                    textToSpeech.speak(
+                        state.product.audioDescription,
+                        TextToSpeech.QUEUE_FLUSH,
+                        null,
+                        state.product.id,
+                    )
+                    viewModel.onAudioDescriptionClick()
+                }
+            },
+            onPaymentClick = { quantity ->
+                pendingQuantity = quantity
+                showPaymentDialog = true
+            },
+            onAddToCartClick = viewModel::addToCart,
+            onOpenChat = { showChat = true }
+        )
+
+        if (showPaymentDialog) {
+            val product = (uiState as? ProductDetailUiState.Success)?.product
+            DummyPaymentDialog(
+                amount = "Rs ${(product?.pricePerUnit ?: 0f) * pendingQuantity}",
+                onPaymentComplete = {
+                    showPaymentDialog = false
+                    viewModel.onPaymentClick(pendingQuantity)
+                },
+                onDismiss = { showPaymentDialog = false }
+            )
+        }
+
+        if (showChat) {
+            SupportChatBottomSheet(
+                onDismissRequest = { showChat = false },
+                onSendMessage = chatViewModel::sendMessage,
+                onVoiceInputClick = {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault())
+                    }
+                    speechLauncher.launch(intent)
+                },
+                messages = chatMessages,
+                isTyping = isTyping
+            )
+        }
+    }
 }
 
 @Composable
@@ -92,6 +152,7 @@ fun ProductDetailScreen(
     onAudioDescriptionClick: () -> Unit,
     onPaymentClick: (Int) -> Unit,
     onAddToCartClick: (Int) -> Unit,
+    onOpenChat: () -> Unit,
 ) {
     HeritageScaffold(
         title = "Product Detail",
@@ -102,6 +163,9 @@ fun ProductDetailScreen(
         Scaffold(
             containerColor = Color.Transparent,
             snackbarHost = { SnackbarHost(snackbarHostState) },
+            floatingActionButton = {
+                SupportChatFAB(onClick = onOpenChat)
+            }
         ) { innerPadding ->
             when (uiState) {
                 ProductDetailUiState.Loading -> Loading(outerPadding, innerPadding)
@@ -353,9 +417,9 @@ private fun DetailContent(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("PROCESSING...", fontWeight = FontWeight.Bold)
                     } else {
-                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(product.ctaLabel.uppercase(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("SECURE PAYMENT", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
 

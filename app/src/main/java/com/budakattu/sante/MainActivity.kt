@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.budakattu.sante.core.ui.theme.BudakattuTheme
+import com.budakattu.sante.data.sync.SyncWorker
 import com.budakattu.sante.navigation.BudakattuNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,6 +17,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        SyncWorker.schedule(this)
 
         setContent {
             BudakattuTheme {

@@ -1,7 +1,7 @@
 package com.budakattu.sante.di
 
 import com.budakattu.sante.data.repository.FirestoreOrderRepository
-import com.budakattu.sante.data.repository.FirestoreProductRepository
+import com.budakattu.sante.data.repository.OfflineFirstProductRepository
 import com.budakattu.sante.data.repository.FirebaseSessionRepository
 import com.budakattu.sante.data.util.AndroidNetworkMonitor
 import com.budakattu.sante.domain.repository.NetworkMonitor
@@ -12,6 +12,10 @@ import com.budakattu.sante.data.repository.FirestoreTraceabilityRepository
 import com.budakattu.sante.domain.repository.TraceabilityRepository
 import com.budakattu.sante.data.repository.MockPaymentGateway
 import com.budakattu.sante.domain.repository.PaymentGateway
+import com.budakattu.sante.data.repository.OfflineFirstMspRepository
+import com.budakattu.sante.domain.repository.MspRepository
+import com.budakattu.sante.data.repository.GeminiRepositoryImpl
+import com.budakattu.sante.domain.repository.AiRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -30,7 +34,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(
-        productRepositoryImpl: FirestoreProductRepository,
+        productRepositoryImpl: OfflineFirstProductRepository,
     ): ProductRepository
 
     @Binds
@@ -56,4 +60,16 @@ abstract class RepositoryModule {
     abstract fun bindSessionRepository(
         firebaseSessionRepository: FirebaseSessionRepository,
     ): SessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMspRepository(
+        mspRepositoryImpl: OfflineFirstMspRepository,
+    ): MspRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiRepository(
+        geminiRepositoryImpl: GeminiRepositoryImpl,
+    ): AiRepository
 }

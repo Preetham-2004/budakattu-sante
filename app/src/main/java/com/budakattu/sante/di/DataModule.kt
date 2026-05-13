@@ -5,6 +5,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.room.Room
+import com.budakattu.sante.data.local.dao.MspDao
+import com.budakattu.sante.data.local.dao.ProductDao
+import com.budakattu.sante.data.local.db.BudakattuDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -51,4 +55,22 @@ object DataModule {
     @Provides
     @Singleton
     fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+    ): BudakattuDatabase {
+        return Room.databaseBuilder(
+            context,
+            BudakattuDatabase::class.java,
+            "budakattu-database",
+        ).build()
+    }
+
+    @Provides
+    fun provideMspDao(db: BudakattuDatabase): MspDao = db.mspDao()
+
+    @Provides
+    fun provideProductDao(db: BudakattuDatabase): ProductDao = db.productDao()
 }

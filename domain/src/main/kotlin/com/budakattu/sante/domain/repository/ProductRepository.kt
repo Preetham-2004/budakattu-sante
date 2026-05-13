@@ -9,4 +9,5 @@ interface ProductRepository {
     suspend fun upsertProduct(product: Product)
     suspend fun deleteProduct(productId: String)
     suspend fun seedProductsIfEmpty()
+    suspend fun sync()
 }

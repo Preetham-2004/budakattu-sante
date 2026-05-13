@@ -88,7 +88,8 @@ private fun androidx.navigation.NavGraphBuilder.authGraph(navController: NavHost
 
 private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHostController) {
     navigation(startDestination = NavRoutes.CATALOG, route = NavRoutes.BUYER_GRAPH) {
-        composable(NavRoutes.CATALOG) {
+        composable(NavRoutes.CATALOG) { backStackEntry ->
+            val paymentSuccess = backStackEntry.savedStateHandle.get<Boolean>("payment_success") ?: false
             CatalogRoute(
                 onOpenProduct = { productId ->
                     navController.navigate("${NavRoutes.PRODUCT_DETAIL_PREFIX}/$productId")
@@ -97,6 +98,8 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
                     navController.navigate(route)
                 },
                 onBack = { navController.popBackStack() },
+                paymentSuccess = paymentSuccess,
+                onClearPaymentSuccess = { backStackEntry.savedStateHandle.remove<Boolean>("payment_success") }
             )
         }
         composable(NavRoutes.HERITAGE) {
@@ -200,7 +203,13 @@ private fun androidx.navigation.NavGraphBuilder.buyerGraph(navController: NavHos
             deepLinks = listOf(navDeepLink { uriPattern = "budakattu://product/{productId}" }),
         ) {
             ProductDetailRoute(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToMarket = {
+                    navController.navigate(NavRoutes.CATALOG) {
+                        popUpTo(NavRoutes.CATALOG) { inclusive = true }
+                    }
+                    navController.currentBackStackEntry?.savedStateHandle?.set("payment_success", true)
+                }
             )
         }
     }
@@ -260,7 +269,7 @@ private fun androidx.navigation.NavGraphBuilder.leaderGraph(navController: NavHo
             LeaderProductEntryRoute(
                 onBack = { navController.popBackStack() },
                 onSuccess = {
-                    navController.navigate(NavRoutes.BUYER_GRAPH) {
+                    navController.navigate(NavRoutes.LEADER_INVENTORY) {
                         popUpTo(NavRoutes.LEADER_HOME)
                     }
                 }

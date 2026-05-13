@@ -24,6 +24,11 @@ import android.util.Log
 import java.util.UUID
 import kotlinx.coroutines.channels.Channel
 
+sealed class ProductDetailEvent {
+    data class ShowSnackbar(val message: String) : ProductDetailEvent()
+    data object OrderSuccess : ProductDetailEvent()
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
@@ -44,7 +49,7 @@ class ProductDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    private val _events = Channel<String>(Channel.BUFFERED)
+    private val _events = Channel<ProductDetailEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private var currentProductPrice: Float = 0f
@@ -136,7 +141,7 @@ class ProductDetailViewModel @Inject constructor(
 
     fun onAudioDescriptionClick() {
         viewModelScope.launch {
-            _events.send("Playing accessibility description.")
+            _events.send(ProductDetailEvent.ShowSnackbar("Playing accessibility description."))
         }
     }
 
@@ -147,7 +152,7 @@ class ProductDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val session = sessionState.first()
             if (session !is SessionState.LoggedIn) {
-                _events.send("Please sign in to complete your purchase.")
+                _events.send(ProductDetailEvent.ShowSnackbar("Please sign in to complete your purchase."))
                 return@launch
             }
 
@@ -176,23 +181,23 @@ class ProductDetailViewModel @Inject constructor(
                         }
                         
                         if (checkoutResult.isSuccess) {
-                            _events.send("Order placed successfully! ID: ${checkoutResult.getOrThrow().orderId}")
+                            _events.send(ProductDetailEvent.OrderSuccess)
                         } else {
                             val error = checkoutResult.exceptionOrNull()
                             Log.e("ProductDetail", "Checkout error: ${error?.message}", error)
-                            _events.send("Error saving order: ${error?.localizedMessage ?: "Unknown error"}")
+                            _events.send(ProductDetailEvent.ShowSnackbar("Error saving order: ${error?.localizedMessage ?: "Unknown error"}"))
                         }
                     }
                     is PaymentResult.Failure -> {
-                        _events.send("Payment failed: ${result.message}")
+                        _events.send(ProductDetailEvent.ShowSnackbar("Payment failed: ${result.message}"))
                     }
                     PaymentResult.Cancelled -> {
-                        _events.send("Payment cancelled.")
+                        _events.send(ProductDetailEvent.ShowSnackbar("Payment cancelled."))
                     }
                 }
             } catch (e: Exception) {
                 Log.e("ProductDetail", "Payment process exception: ${e.message}", e)
-                _events.send("Checkout failed: ${e.localizedMessage ?: "Connection error"}")
+                _events.send(ProductDetailEvent.ShowSnackbar("Checkout failed: ${e.localizedMessage ?: "Connection error"}"))
             } finally {
                 _uiState.update { 
                     if (it is ProductDetailUiState.Success) it.copy(isProcessingPayment = false) else it 
@@ -211,7 +216,7 @@ class ProductDetailViewModel @Inject constructor(
         val userId = when (val session = sessionState.first()) {
             is SessionState.LoggedIn -> session.userId
             else -> {
-                _events.send("Please sign in to continue.")
+                _events.send(ProductDetailEvent.ShowSnackbar("Please sign in to continue."))
                 return false
             }
         }
@@ -219,10 +224,10 @@ class ProductDetailViewModel @Inject constructor(
             addToCartUseCase(userId = userId, productId = productId, quantity = quantity)
         }.onSuccess {
             if (notifySuccess) {
-                _events.send("Added to cart.")
+                _events.send(ProductDetailEvent.ShowSnackbar("Added to cart."))
             }
         }.onFailure { error ->
-            _events.send(error.localizedMessage ?: "Unable to add to cart")
+            _events.send(ProductDetailEvent.ShowSnackbar(error.localizedMessage ?: "Unable to add to cart"))
         }.isSuccess
     }
 }

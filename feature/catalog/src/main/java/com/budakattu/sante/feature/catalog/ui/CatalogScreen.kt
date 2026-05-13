@@ -1,5 +1,9 @@
 package com.budakattu.sante.feature.catalog.ui
 
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,26 +27,48 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.budakattu.sante.core.ui.components.BuyerRouteStrip
-import com.budakattu.sante.core.ui.components.ForestCard
-import com.budakattu.sante.core.ui.components.HeritageScaffold
-import com.budakattu.sante.core.ui.components.MspBadge
-import com.budakattu.sante.core.ui.components.RouteBadge
+import com.budakattu.sante.core.ui.components.*
 import com.budakattu.sante.core.ui.theme.BarkBrown
 import com.budakattu.sante.core.ui.theme.ForestPrimary
 import com.budakattu.sante.core.ui.theme.ForestBackground
 import com.budakattu.sante.core.ui.theme.SunsetClay
 import com.budakattu.sante.feature.catalog.viewmodel.ProductListViewModel
+import com.budakattu.sante.feature.catalog.viewmodel.SupportChatViewModel
 
 @Composable
 fun CatalogRoute(
     onOpenProduct: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
     onBack: () -> Unit,
+    paymentSuccess: Boolean = false,
+    onClearPaymentSuccess: () -> Unit = {},
     viewModel: ProductListViewModel = hiltViewModel(),
+    chatViewModel: SupportChatViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
+    val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
+    
     val snackbarHostState = remember { SnackbarHostState() }
+    var showChat by remember { mutableStateOf(false) }
+
+    LaunchedEffect(paymentSuccess) {
+        if (paymentSuccess) {
+            snackbarHostState.showSnackbar("Payment Successful! Your order has been placed.")
+            onClearPaymentSuccess()
+        }
+    }
+
+    val speechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+            if (spokenText != null) {
+                chatViewModel.sendMessage(spokenText)
+            }
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -52,13 +78,33 @@ fun CatalogRoute(
         }
     }
 
-    CatalogScreen(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        onProductClick = viewModel::onProductClick,
-        onOpenRoute = onOpenRoute,
-        onBack = onBack,
-    )
+    Box {
+        CatalogScreen(
+            uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            onProductClick = viewModel::onProductClick,
+            onOpenRoute = onOpenRoute,
+            onBack = onBack,
+            onOpenChat = { showChat = true }
+        )
+
+        if (showChat) {
+            SupportChatBottomSheet(
+                onDismissRequest = { showChat = false },
+                onSendMessage = chatViewModel::sendMessage,
+                onVoiceInputClick = {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        // This allows for any regional language supported by Google
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault())
+                    }
+                    speechLauncher.launch(intent)
+                },
+                messages = chatMessages,
+                isTyping = isTyping
+            )
+        }
+    }
 }
 
 @Composable
@@ -68,6 +114,7 @@ fun CatalogScreen(
     onProductClick: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
     onBack: () -> Unit,
+    onOpenChat: () -> Unit,
 ) {
     val successState = uiState as? ProductListUiState.Success
     HeritageScaffold(
@@ -109,6 +156,9 @@ fun CatalogScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.Transparent,
+            floatingActionButton = {
+                SupportChatFAB(onClick = onOpenChat)
+            }
         ) { contentPadding ->
             when (uiState) {
                 ProductListUiState.Loading -> LoadingState(innerPadding, contentPadding)

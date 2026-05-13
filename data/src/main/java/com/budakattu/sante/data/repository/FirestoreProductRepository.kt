@@ -74,6 +74,10 @@ class FirestoreProductRepository @Inject constructor(
         awaitTask { batch.commit() }
     }
 
+    override suspend fun sync() {
+        // Direct Firestore implementation doesn't need explicit sync
+    }
+
     private suspend fun <T> awaitTask(block: () -> com.google.android.gms.tasks.Task<T>): T {
         return suspendCancellableCoroutine { continuation ->
             block()
