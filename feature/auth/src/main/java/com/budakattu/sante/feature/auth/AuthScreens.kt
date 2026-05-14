@@ -123,11 +123,11 @@ fun SplashRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ForestCard {
-                Text("Budakattu-Sante", style = MaterialTheme.typography.headlineMedium, color = LeaderPrimary)
+                Text("Budakattu-Sante", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("Traditional value. Modern market access.")
+                Text("Traditional value. Modern market access.", color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator(color = LeaderPrimary)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -155,8 +155,8 @@ fun OnboardingScreen(
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LeaderPrimary,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 onClick = {
                     viewModel.completeOnboarding()
@@ -291,14 +291,14 @@ private fun AuthForm(
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LeaderPrimary,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 enabled = !uiState.isLoading,
                 onClick = onPrimaryAction,
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(color = Color.White)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
                 } else {
                     Text(buttonLabel, fontWeight = FontWeight.Bold)
                 }
@@ -359,7 +359,7 @@ private fun LoginExperience(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(LeaderBackground, Color(0xFFECEAE0), LeaderBackground),
+                    colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.background),
                 ),
             ),
     ) {
@@ -377,7 +377,7 @@ private fun LoginExperience(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 2.dp,
                 shadowElevation = 8.dp,
             ) {
@@ -484,13 +484,13 @@ private fun LoginExperience(
                         enabled = !uiState.isLoading,
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = LeaderPrimary,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = onPrimaryAction,
                     ) {
                         if (uiState.isLoading) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp))
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
                         } else {
                             Text("Enter Marketplace", fontWeight = FontWeight.Bold)
                         }
@@ -589,7 +589,7 @@ private fun SignupExperience(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(LeaderBackground, Color(0xFFECEAE0), LeaderBackground),
+                    colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.background),
                 ),
             ),
     ) {
@@ -611,7 +611,7 @@ private fun SignupExperience(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 2.dp,
                 shadowElevation = 8.dp,
             ) {
@@ -722,13 +722,13 @@ private fun SignupExperience(
                         enabled = !uiState.isLoading,
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = LeaderPrimary,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = onPrimaryAction,
                     ) {
                         if (uiState.isLoading) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp))
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
                         } else {
                             Text("Create account", fontWeight = FontWeight.Bold)
                         }
@@ -896,16 +896,16 @@ private fun WelcomePanel(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Text(title, style = MaterialTheme.typography.headlineMedium, color = Color.White, fontWeight = FontWeight.Black)
+                    Text(title, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Black)
                     Text(
                         subtitle,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.92f),
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     )
                 }
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.15f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f),
                     modifier = Modifier.size(72.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -913,7 +913,7 @@ private fun WelcomePanel(
                             imageVector = Icons.Outlined.Eco,
                             contentDescription = null,
                             modifier = Modifier.size(36.dp),
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                         )
                     }
                 }
@@ -945,7 +945,7 @@ private fun InfoBadge(
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = Color.White.copy(alpha = 0.1f),
+        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -956,11 +956,11 @@ private fun InfoBadge(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = Color.White.copy(alpha = 0.8f),
+                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
             )
             Column {
-                Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
-                Text(value, style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Black)
+                Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
+                Text(value, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Black)
             }
         }
     }
@@ -968,7 +968,7 @@ private fun InfoBadge(
 
 @Composable
 private fun LoginFieldLabel(text: String) {
-    Text(text = text, style = MaterialTheme.typography.labelLarge, color = LeaderSecondary, fontWeight = FontWeight.Bold)
+    Text(text = text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
 }
 
 @Composable

@@ -24,7 +24,7 @@ class FirestoreMspRepository @Inject constructor(
                 return@addSnapshotListener
             }
             val records = snapshot?.documents
-                ?.mapNotNull { it.toMspRecord() }
+                ?.asSequence()?.mapNotNull { it.toMspRecord() }?.toList()
                 ?.sortedBy { it.categoryName }
                 .orEmpty()
             trySend(records)
@@ -56,7 +56,7 @@ class FirestoreMspRepository @Inject constructor(
         )
         val batch = firestore.batch()
         defaults.forEach { record ->
-            batch.set(collection.document(record.categoryId), record.toMap())
+            batch[collection.document(record.categoryId)] = record.toMap()
         }
         awaitTask { batch.commit() }
     }

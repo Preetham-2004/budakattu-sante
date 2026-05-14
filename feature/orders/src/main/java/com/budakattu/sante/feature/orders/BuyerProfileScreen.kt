@@ -62,7 +62,6 @@ import com.budakattu.sante.core.ui.components.BuyerRouteStrip
 import com.budakattu.sante.core.ui.components.ForestCard
 import com.budakattu.sante.core.ui.components.HeritageScaffold
 import com.budakattu.sante.core.ui.components.RouteBadge
-import com.budakattu.sante.core.ui.theme.CharcoalInk
 import com.budakattu.sante.core.ui.theme.ForestBackground
 import com.budakattu.sante.core.ui.theme.ForestPrimary
 import com.budakattu.sante.core.ui.theme.LeafAccent
@@ -114,24 +113,24 @@ fun BuyerProfileRoute(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = { onBack() },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary)
                 }
                 
                 IconButton(
                     onClick = onSignOut,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out", tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -197,24 +196,22 @@ private fun ProfileContent(
             ProfileHeroCard(
                 state = state,
                 isEditing = isEditing,
-                onToggleEdit = {
-                    form = state.toFormState()
-                    isEditing = !isEditing
-                },
-            )
+            ) {
+                form = state.toFormState()
+                isEditing = !isEditing
+            }
         }
 
         if (isEditing) {
             item {
-                ProfileFormCard(
-                    form = form,
-                    isUpdating = state.isUpdating,
-                    onFormChange = { form = it },
-                    onSave = {
-                        onUpdateProfile(form)
-                        isEditing = false
-                    },
-                )
+        ProfileFormCard(
+            form = form,
+            isUpdating = state.isUpdating,
+            onFormChange = { form = it },
+        ) {
+            onUpdateProfile(form)
+            isEditing = false
+        }
             }
         } else {
             item {
@@ -286,8 +283,8 @@ private fun ProfileContent(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SunsetClay,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 ),
                 shape = RoundedCornerShape(16.dp),
             ) {
@@ -323,12 +320,12 @@ private fun ProfileHeroCard(
                     text = state.name.ifBlank { "Buyer account" },
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = CharcoalInk,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = state.email,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = CharcoalInk.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ElevatedAssistChip(
@@ -362,10 +359,10 @@ private fun ProfileHeroCard(
             text = if (state.missingFields.isEmpty()) {
                 "All important buyer details are available."
             } else {
-                "Add ${state.missingFields.take(3).joinToString()} to complete your buyer profile."
+                "Add ${state.missingFields.asSequence().take(3).joinToString()} to complete your buyer profile."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = CharcoalInk.copy(alpha = 0.78f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
         )
     }
 }
@@ -390,7 +387,7 @@ private fun CompletionPromptCard(
                 "Missing: ${missingFields.joinToString()}"
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = CharcoalInk.copy(alpha = 0.75f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
         )
         if (missingFields.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -442,7 +439,7 @@ private fun ProfileFormCard(
         Text(
             "Users can sign up with only basic details. Finish the rest here for smoother delivery and support.",
             style = MaterialTheme.typography.bodyMedium,
-            color = CharcoalInk.copy(alpha = 0.75f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
         )
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -537,8 +534,8 @@ private fun ProfileFormCard(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ForestPrimary,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = RoundedCornerShape(16.dp),
             enabled = !isUpdating,
@@ -546,7 +543,7 @@ private fun ProfileFormCard(
             if (isUpdating) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(22.dp),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             } else {
                 Icon(Icons.Default.Save, contentDescription = null)
@@ -629,13 +626,13 @@ private fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = CharcoalInk.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            color = CharcoalInk,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -705,7 +702,7 @@ private fun calculateProfileCompletion(content: BuyerProfileUiState.Content): Pa
     )
     val completed = trackedFields.count { (_, value) -> value.isNotBlank() }
     val missing = trackedFields.filter { (_, value) -> value.isBlank() }.map { (label, _) -> label }
-    return completed.toFloat() / trackedFields.size.toFloat() to missing
+    return (completed.toFloat() / trackedFields.size.toFloat()) to missing
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -719,7 +716,7 @@ class BuyerProfileViewModel @Inject constructor(
     private val _events = Channel<String>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    private val _isUpdating = kotlinx.coroutines.flow.MutableStateFlow(false)
+    private val _isUpdating = kotlinx.coroutines.flow.MutableStateFlow(value = false)
 
     val uiState = observeSessionUseCase()
         .flatMapLatest { session ->
@@ -745,7 +742,7 @@ class BuyerProfileViewModel @Inject constructor(
                             profilePictureUrl = loggedIn.profilePictureUrl,
                             totalOrders = orders.size,
                             activePreorders = orders.count {
-                                it.status == OrderStatus.RESERVED || it.status == OrderStatus.PENDING
+                                (it.status == OrderStatus.RESERVED || it.status == OrderStatus.PENDING)
                             },
                             isUpdating = updating,
                         )

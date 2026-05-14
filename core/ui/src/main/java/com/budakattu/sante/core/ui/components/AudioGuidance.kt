@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,8 +22,8 @@ import java.util.Locale
 fun AudioGuidanceButton(
     text: String,
     modifier: Modifier = Modifier,
-    tint: Color = ForestPrimary,
-    backgroundColor: Color = Color.White.copy(alpha = 0.9f)
+    tint: Color = MaterialTheme.colorScheme.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
 ) {
     val context = LocalContext.current
     var tts: TextToSpeech? by remember { mutableStateOf(null) }

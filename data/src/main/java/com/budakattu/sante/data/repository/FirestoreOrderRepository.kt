@@ -49,7 +49,7 @@ class FirestoreOrderRepository @Inject constructor(
 
         fun emitCart() {
             val cart = latestCart
-            if (cart == null && latestItems.isEmpty()) {
+            if ((cart == null) && latestItems.isEmpty()) {
                 trySend(null)
             } else {
                 trySend(
@@ -85,9 +85,9 @@ class FirestoreOrderRepository @Inject constructor(
                 return@addSnapshotListener
             }
             latestItems = snapshot?.documents
-                ?.mapNotNull { it as? QueryDocumentSnapshot }
+                ?.asSequence()?.mapNotNull { it as? QueryDocumentSnapshot }
                 ?.map { it.toCartItemDomain() }
-                .orEmpty()
+                ?.toList() ?: emptyList()
             emitCart()
         }
 
@@ -104,7 +104,7 @@ class FirestoreOrderRepository @Inject constructor(
 
         awaitTask {
             firestore.runTransaction { transaction ->
-                val product = transaction.get(productRef).toObject(ProductDocument::class.java)
+                val product = transaction[productRef].toObject(ProductDocument::class.java)
                     ?: throw IllegalStateException("Product not found")
 
                 validateCartQuantity(product, quantity)
@@ -113,22 +113,19 @@ class FirestoreOrderRepository @Inject constructor(
                 val newQuantity = (cartItem?.quantity ?: 0).toInt() + quantity
 
                 if (cartItem == null) {
-                    transaction.set(
-                        itemRef,
-                        CartItemDocument(
+                    transaction[itemRef] = CartItemDocument(
                             itemId = productId,
                             productId = productId,
                             productName = product.name,
                             quantity = newQuantity.toLong(),
-                            pricePerUnit = product.pricePerUnit.toDouble(),
+                            pricePerUnit = product.pricePerUnit,
                             unit = product.unit,
                             imageUrl = product.imageUrls.firstOrNull(),
                             familyName = product.familyName,
                             village = product.village,
                             availability = product.availability,
                             expectedDispatchDate = product.expectedDispatchDate,
-                        ),
-                    )
+                        )
                 } else {
                     transaction.update(itemRef, "quantity", newQuantity.toLong())
                 }
@@ -151,7 +148,7 @@ class FirestoreOrderRepository @Inject constructor(
 
         awaitTask {
             firestore.runTransaction { transaction ->
-                val product = transaction.get(productRef).toObject(ProductDocument::class.java)
+                val product = transaction[productRef].toObject(ProductDocument::class.java)
                     ?: throw IllegalStateException("Product not found")
 
                 validateCartQuantity(product, quantity)
@@ -191,13 +188,12 @@ class FirestoreOrderRepository @Inject constructor(
 
                 items.forEach { item ->
                     val productRef = products.document(item.productId)
-                    val product = transaction.get(productRef).toObject(ProductDocument::class.java)
+                    val product = transaction[productRef].toObject(ProductDocument::class.java)
                         ?: throw IllegalStateException("Product ${item.productName} not found")
 
                     validateCheckoutQuantity(product, item.quantity.toInt())
 
-                    val availability = product.availability.toAvailability()
-                    when (availability) {
+                    when (product.availability.toAvailability()) {
                         ProductAvailability.IN_STOCK -> {
                             transaction.update(
                                 productRef,
@@ -451,7 +447,7 @@ class FirestoreOrderRepository @Inject constructor(
                         status = status.name,
                         orderType = orderType.name,
                         totalItems = quantity.toLong(),
-                        totalAmount = quantity.toDouble() * product.pricePerUnit.toDouble(),
+                        totalAmount = quantity.toDouble() * product.pricePerUnit,
                         createdAt = now,
                         updatedAt = now,
                         expectedDispatchDate = product.expectedDispatchDate,
@@ -490,18 +486,18 @@ class FirestoreOrderRepository @Inject constructor(
 
 private fun String.toAvailability(): ProductAvailability = try {
     ProductAvailability.valueOf(this)
-} catch (e: Exception) {
+} catch (_: Exception) {
     ProductAvailability.IN_STOCK
 }
 
 private fun String.toOrderStatus(): OrderStatus = try {
     OrderStatus.valueOf(this)
-} catch (e: Exception) {
+} catch (_: Exception) {
     OrderStatus.PENDING
 }
 
 private fun String.toOrderType(): OrderType = try {
     OrderType.valueOf(this)
-} catch (e: Exception) {
+} catch (_: Exception) {
     OrderType.READY
 }

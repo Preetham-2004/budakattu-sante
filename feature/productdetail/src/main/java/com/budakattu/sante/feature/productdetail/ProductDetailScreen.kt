@@ -8,18 +8,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,7 +34,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.*
 import com.budakattu.sante.core.ui.theme.*
-import com.budakattu.sante.feature.productdetail.SupportChatViewModel
 import java.util.Locale
 
 @Composable
@@ -45,24 +41,23 @@ fun ProductDetailRoute(
     onBack: () -> Unit,
     onNavigateToMarket: () -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel(),
-    chatViewModel: SupportChatViewModel = hiltViewModel()
+    chatViewModel: SupportChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
     val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
-    var showChat by remember { mutableStateOf(false) }
-    var showPaymentDialog by remember { mutableStateOf(false) }
+    var showChat by remember { mutableStateOf(value = false) }
+    var showPaymentDialog by remember { mutableStateOf(value = false) }
     var pendingQuantity by remember { mutableIntStateOf(1) }
 
     val speechLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-            if (spokenText != null) {
-                chatViewModel.sendMessage(spokenText)
+            result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { text ->
+                chatViewModel.sendMessage(text)
             }
         }
     }
@@ -111,8 +106,7 @@ fun ProductDetailRoute(
                 showPaymentDialog = true
             },
             onAddToCartClick = viewModel::addToCart,
-            onOpenChat = { showChat = true }
-        )
+        ) { showChat = true }
 
         if (showPaymentDialog) {
             val product = (uiState as? ProductDetailUiState.Success)?.product
@@ -122,7 +116,7 @@ fun ProductDetailRoute(
                     showPaymentDialog = false
                     viewModel.onPaymentClick(pendingQuantity)
                 },
-                onDismiss = { showPaymentDialog = false }
+                onDismiss = { showPaymentDialog = false },
             )
         }
 
@@ -133,7 +127,7 @@ fun ProductDetailRoute(
                 onVoiceInputClick = {
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault())
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
                     }
                     speechLauncher.launch(intent)
                 },
@@ -227,7 +221,7 @@ private fun DetailContent(
         item {
             Surface(
                 shape = RoundedCornerShape(32.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 4.dp
             ) {
                 Box {
@@ -244,9 +238,13 @@ private fun DetailContent(
                             .padding(16.dp)
                             .size(56.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.9f))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
                     ) {
-                        Icon(Icons.Default.VolumeUp, contentDescription = null, tint = ForestPrimary)
+                        Icon(
+                        Icons.AutoMirrored.Filled.VolumeUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                     }
                 }
             }
@@ -257,7 +255,7 @@ private fun DetailContent(
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.headlineLarge,
-                    color = ForestPrimary
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -268,13 +266,13 @@ private fun DetailContent(
                         Text(
                             text = "Rs ${totalPrice.toInt()}",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = SunsetClay,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Black
                         )
                         Text(
                             text = "Total for $quantity ${product.unit}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
                     MspBadge(isSafe = product.isMspSafe)
@@ -285,14 +283,14 @@ private fun DetailContent(
         item {
             HighlightCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Storefront, contentDescription = null, tint = ForestPrimary, modifier = Modifier.size(24.dp))
+                    Icon(Icons.Default.Storefront, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text("Product Owner & Admin", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = ForestPrimary)
+                    Text("Product Owner & Admin", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Surface(
-                    color = ForestBackground,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -301,12 +299,12 @@ private fun DetailContent(
                             text = product.familyTitle,
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Black,
-                            color = TraditionalPrimary
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = "Official Cooperative Administrator",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                         
                         product.familyDetails?.let { details ->
@@ -314,12 +312,13 @@ private fun DetailContent(
                             Text(
                                 text = "Expertise: ${details.primaryCraft}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Region: ${details.forestRegion}, ${details.district}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = CharcoalInk.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                         }
 
@@ -327,16 +326,17 @@ private fun DetailContent(
                         Text(
                             text = "Village: ${product.village}",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Origin Story", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                Text(text = "Origin Story", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 
                 val displayStory = product.familyDetails?.story ?: product.description
-                Text(text = displayStory, style = MaterialTheme.typography.bodyMedium, color = CharcoalInk.copy(alpha = 0.8f))
+                Text(text = displayStory, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
             }
         }
 
@@ -347,34 +347,34 @@ private fun DetailContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Quantity", style = MaterialTheme.typography.titleMedium)
+                    Text("Quantity", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(
                             onClick = { if (quantity > 1) quantity -= 1 },
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(MistVeil)
-                                .border(1.dp, ForestPrimary.copy(alpha = 0.2f), CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape)
                         ) {
-                            Icon(Icons.Default.Remove, contentDescription = null, tint = ForestPrimary)
+                            Icon(Icons.Default.Remove, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
                         Text(
                             text = quantity.toString(),
                             modifier = Modifier.padding(horizontal = 24.dp),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = CharcoalInk
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         IconButton(
                             onClick = { quantity += 1 },
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(MistVeil)
-                                .border(1.dp, ForestPrimary.copy(alpha = 0.2f), CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, tint = ForestPrimary)
+                            Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -385,8 +385,8 @@ private fun DetailContent(
                     onClick = { onAddToCartClick(quantity) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(2.dp, ForestPrimary),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ForestPrimary),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                     enabled = product.ctaLabel != "Unavailable"
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -401,23 +401,23 @@ private fun DetailContent(
                     modifier = Modifier.fillMaxWidth().height(64.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ForestPrimary,
-                        contentColor = Color.White,
-                        disabledContainerColor = ForestPrimary.copy(alpha = 0.5f),
-                        disabledContentColor = Color.White.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                     ),
-                    enabled = !state.isProcessingPayment && product.ctaLabel != "Unavailable"
+                    enabled = (!state.isProcessingPayment && (product.ctaLabel != "Unavailable")),
                 ) {
                     if (state.isProcessingPayment) {
                         CircularProgressIndicator(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(24.dp),
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("PROCESSING...", fontWeight = FontWeight.Bold)
                     } else {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("SECURE PAYMENT", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
@@ -428,7 +428,7 @@ private fun DetailContent(
                     Text(
                         text = "Secure payment powered by Razorpay",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }

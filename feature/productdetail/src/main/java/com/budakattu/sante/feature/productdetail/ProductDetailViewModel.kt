@@ -111,7 +111,7 @@ class ProductDetailViewModel @Inject constructor(
                                             listOf("https://images.unsplash.com/photo-1471943311424-646960669fbc?w=900")
                                         },
                                     ),
-                                    relatedProducts = allProducts
+                                    relatedProducts = allProducts.asSequence()
                                         .filterNot { it.productId == product.productId }
                                         .take(3)
                                         .map {
@@ -120,9 +120,10 @@ class ProductDetailViewModel @Inject constructor(
                                                 title = it.name,
                                                 subtitle = "${it.familyName} - ${it.categoryName}",
                                             )
-                                        },
+                                        }
+                                        .toList(),
                                     isOffline = !networkMonitor.isOnline,
-                                    isProcessingPayment = currentSuccess?.isProcessingPayment ?: false
+                                    isProcessingPayment = currentSuccess?.isProcessingPayment ?: false,
                                 )
                             }
                         }
@@ -146,7 +147,7 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     fun onPaymentClick(quantity: Int) {
-        val currentState = _uiState.value as? ProductDetailUiState.Success ?: return
+        val currentState = (uiState.value as? ProductDetailUiState.Success) ?: return
         if (currentState.isProcessingPayment) return
 
         viewModelScope.launch {
@@ -156,8 +157,8 @@ class ProductDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.update { 
-                if (it is ProductDetailUiState.Success) it.copy(isProcessingPayment = true) else it 
+            _uiState.update { state ->
+                (state as? ProductDetailUiState.Success)?.copy(isProcessingPayment = true) ?: state
             }
 
             try {
@@ -167,7 +168,7 @@ class ProductDetailViewModel @Inject constructor(
                     orderId = "ORD_${UUID.randomUUID().toString().take(6).uppercase()}",
                     customerName = session.name,
                     customerEmail = "", 
-                    customerPhone = ""
+                    customerPhone = "",
                 )
 
                 when (result) {
@@ -176,7 +177,7 @@ class ProductDetailViewModel @Inject constructor(
                             checkoutSingleItemUseCase(
                                 userId = session.userId,
                                 productId = productId,
-                                quantity = quantity
+                                quantity = quantity,
                             )
                         }
                         
@@ -199,8 +200,8 @@ class ProductDetailViewModel @Inject constructor(
                 Log.e("ProductDetail", "Payment process exception: ${e.message}", e)
                 _events.send(ProductDetailEvent.ShowSnackbar("Checkout failed: ${e.localizedMessage ?: "Connection error"}"))
             } finally {
-                _uiState.update { 
-                    if (it is ProductDetailUiState.Success) it.copy(isProcessingPayment = false) else it 
+                _uiState.update { state ->
+                    (state as? ProductDetailUiState.Success)?.copy(isProcessingPayment = false) ?: state
                 }
             }
         }

@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.hilt.android)
+    implementation(libs.stripe.android)
     implementation(libs.androidx.hilt.work)
     implementation(libs.googleid)
     implementation(libs.kotlinx.coroutines.android)

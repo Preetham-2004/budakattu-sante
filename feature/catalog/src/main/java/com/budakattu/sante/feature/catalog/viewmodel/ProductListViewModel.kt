@@ -7,6 +7,7 @@ import com.budakattu.sante.domain.model.ProductAvailability
 import com.budakattu.sante.domain.repository.NetworkMonitor
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
 import com.budakattu.sante.domain.usecase.product.SeedCatalogUseCase
+import com.budakattu.sante.domain.usecase.product.SyncProductsUseCase
 import com.budakattu.sante.domain.model.SessionState
 import com.budakattu.sante.domain.usecase.session.ObserveSessionUseCase
 import com.budakattu.sante.domain.util.MspValidator
@@ -24,15 +25,20 @@ import kotlinx.coroutines.launch
 class ProductListViewModel @Inject constructor(
     getProductsUseCase: GetProductsUseCase,
     seedCatalogUseCase: SeedCatalogUseCase,
+    private val syncProductsUseCase: SyncProductsUseCase,
     observeSessionUseCase: ObserveSessionUseCase,
     networkMonitor: NetworkMonitor,
     private val mspValidator: MspValidator,
 ) : ViewModel() {
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     val uiState: StateFlow<ProductListUiState> = combine(
         getProductsUseCase(),
-        observeSessionUseCase()
-    ) { products, session ->
-        if (products.isEmpty() && !networkMonitor.isOnline) {
+        observeSessionUseCase(),
+        _isRefreshing
+    ) { products, session, refreshing ->
+        if (products.isEmpty() && !networkMonitor.isOnline && !refreshing) {
             ProductListUiState.Offline
         } else {
             val user = (session as? SessionState.LoggedIn)
@@ -45,6 +51,7 @@ class ProductListViewModel @Inject constructor(
         }
     }.onStart {
         runCatching { seedCatalogUseCase() }
+        refresh()
     }.catch { error ->
         emit(ProductListUiState.Error(error.localizedMessage ?: "Unknown error"))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProductListUiState.Loading)
@@ -55,6 +62,14 @@ class ProductListViewModel @Inject constructor(
     fun onProductClick(productId: String) {
         viewModelScope.launch {
             _events.emit(ProductListEvent.NavigateToDetail(productId))
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            runCatching { syncProductsUseCase() }
+            _isRefreshing.value = false
         }
     }
 

@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -24,14 +23,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.*
 import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.Product
-import com.budakattu.sante.feature.leader.SupportChatViewModel
 
 @Composable
 fun LeaderDashboardRoute(
@@ -42,20 +39,19 @@ fun LeaderDashboardRoute(
     onEditDraft: (String) -> Unit,
     onSignOut: () -> Unit,
     viewModel: LeaderDashboardViewModel = hiltViewModel(),
-    chatViewModel: SupportChatViewModel = hiltViewModel()
+    chatViewModel: SupportChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
     val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
-    var showChat by remember { mutableStateOf(false) }
+    var showChat by remember { mutableStateOf(value = false) }
 
     val speechLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-            if (spokenText != null) {
-                chatViewModel.sendMessage(spokenText)
+            result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { text ->
+                chatViewModel.sendMessage(text)
             }
         }
     }
@@ -69,8 +65,7 @@ fun LeaderDashboardRoute(
             onOpenInsights = onOpenInsights,
             onEditDraft = onEditDraft,
             onSignOut = onSignOut,
-            onOpenChat = { showChat = true }
-        )
+        ) { showChat = true }
 
         if (showChat) {
             SupportChatBottomSheet(
@@ -121,7 +116,7 @@ private fun LeaderDashboardScreen(
                             modifier = Modifier
                                 .size(52.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.15f)),
+                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                             contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(16.dp))
@@ -129,13 +124,13 @@ private fun LeaderDashboardScreen(
                             Text(
                                 text = uiState.leaderName,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "Administrator",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.6f)
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                             )
                         }
                     }
@@ -144,17 +139,17 @@ private fun LeaderDashboardScreen(
                         onClick = onSignOut,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
                     }
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
                     AudioGuidanceButton(
                         text = "This is your Cooperative Headquarters. You can list new produce, manage inventory, and view order logs.",
-                        backgroundColor = Color.White.copy(alpha = 0.2f),
-                        tint = Color.White
+                        backgroundColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -245,9 +240,9 @@ private fun MetricCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = LeaderSurface,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
+        border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -255,8 +250,8 @@ private fun MetricCard(
         ) {
             Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = CharcoalInk)
-            Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text(text = value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
         }
     }
 }
@@ -314,7 +309,7 @@ private fun OperationActionCard(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         color = color,
-        contentColor = Color.White,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
         shadowElevation = 4.dp
     ) {
         Row(
@@ -323,14 +318,14 @@ private fun OperationActionCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
-                modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.2f), CircleShape),
+                modifier = Modifier.size(36.dp).background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.25f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
             }
-            Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
             Spacer(modifier = Modifier.weight(1f))
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.5f))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f))
         }
     }
 }
@@ -341,20 +336,20 @@ private fun InsightsCard(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = LeaderHighlight,
-        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.1f))
+        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Insights, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(24.dp))
+            Icon(Icons.Default.Insights, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Cooperative Insights", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = LeaderPrimary)
-                Text("Review demand forecasting and harvest data", style = MaterialTheme.typography.labelSmall, color = LeaderSecondary.copy(alpha = 0.7f))
+                Text("Cooperative Insights", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
+                Text("Review demand forecasting and harvest data", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
             }
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(16.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -378,20 +373,20 @@ private fun DraftItem(product: Product, onEditDraft: (String) -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = LeaderSurface,
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(LeaderBackground)) {
+            Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
                 AsyncImage(model = product.imageUrls.firstOrNull(), contentDescription = null, contentScale = ContentScale.Crop)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = CharcoalInk)
-                Text("Last saved: ${product.lastModifiedAt}", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Last saved: ${product.lastModifiedAt}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
             TextButton(onClick = { onEditDraft(product.productId) }) {
-                Text("RESUME", fontWeight = FontWeight.Bold, color = LeaderPrimary)
+                Text("RESUME", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             }
         }
     }

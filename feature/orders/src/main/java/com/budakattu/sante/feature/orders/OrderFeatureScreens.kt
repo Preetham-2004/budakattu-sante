@@ -1,14 +1,11 @@
 package com.budakattu.sante.feature.orders
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Add
@@ -56,7 +53,7 @@ fun BuyerOrdersRoute(
         title = "Order Drumbeat",
         subtitle = "Review your current reservations, confirmed orders, and dispatch promises.",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
     ) { padding ->
         when (val state = uiState) {
             BuyerOrdersUiState.Loading -> LoadingBody(padding)
@@ -116,6 +113,7 @@ fun CartRoute(
                 CartUiState.Empty -> EmptyCartBody(padding, innerPadding, onBack)
                 is CartUiState.Content -> CartScreen(
                     state = state.cart,
+                    isProcessing = state.isProcessing,
                     activeRoute = activeRoute,
                     marketRoute = marketRoute,
                     cartRoute = cartRoute,
@@ -145,7 +143,7 @@ fun OrderConfirmationRoute(
         title = "Preorder Confirmed",
         subtitle = "Your request has been passed to the cooperative.",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
     ) { padding ->
         Column(
             modifier = Modifier
@@ -155,14 +153,25 @@ fun OrderConfirmationRoute(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             ForestCard {
-                Text("Order reference", style = MaterialTheme.typography.titleLarge)
-                Text(orderId, modifier = Modifier.padding(top = 8.dp))
-                Text("Mock payment captured. Cooperative confirmation will update the status automatically.", modifier = Modifier.padding(top = 8.dp))
+                Text("Order reference", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text(orderId, modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                Text("Secure Stripe payment captured. Your preorder has been successfully transmitted to the tribal cooperative for processing.", modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
             }
-            Button(modifier = Modifier.fillMaxWidth(), onClick = onViewOrders) {
+            Button(
+                modifier = Modifier.fillMaxWidth(), 
+                onClick = onViewOrders,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
                 Text("View order history")
             }
-            Button(modifier = Modifier.fillMaxWidth(), onClick = onBackToMarket) {
+            Button(
+                modifier = Modifier.fillMaxWidth(), 
+                onClick = onBackToMarket,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary)
+            ) {
                 Text("Back to market")
             }
         }
@@ -179,7 +188,7 @@ fun OrderDetailRoute(
         title = "Order Tracking",
         subtitle = "See where your preorder sits in the cooperative flow.",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
     ) { padding ->
         when (val state = uiState) {
             OrderDetailUiState.Loading -> LoadingBody(padding)
@@ -204,7 +213,7 @@ fun LeaderOrdersRoute(
         title = "Order Fulfillment",
         subtitle = "Monitor reservations, confirm dispatch readiness, and close the loop.",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (val state = uiState) {
@@ -249,12 +258,15 @@ private fun BuyerOrdersScreen(
         }
         item {
             ForestCard {
-                Text("Buyer order trail", style = MaterialTheme.typography.titleLarge)
-                Text("Review reservations, confirmations, and dispatch promises before the next seasonal cycle moves.")
+                Text("Buyer order trail", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text("Review reservations, confirmations, and dispatch promises before the next seasonal cycle moves.", color = MaterialTheme.colorScheme.onSurface)
                 Button(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp), 
                     onClick = onOpenCart,
-                    colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text("Open cart", fontWeight = FontWeight.Bold)
                 }
@@ -265,8 +277,8 @@ private fun BuyerOrdersScreen(
         } else {
             items(state.orders, key = { it.orderId }) { order ->
                 ForestCard {
-                    Text(order.orderId, style = MaterialTheme.typography.titleLarge)
-                    Text(order.summary, modifier = Modifier.padding(top = 6.dp))
+                    Text(order.orderId, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(order.summary, modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -276,14 +288,17 @@ private fun BuyerOrdersScreen(
                         RouteBadge(label = "Status", value = order.statusLabel)
                         RouteBadge(label = "Type", value = order.typeLabel)
                     }
-                    Text(order.totalAmountLabel, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 10.dp))
+                    Text(order.totalAmountLabel, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 10.dp))
                     order.dispatchLabel?.let {
-                        Text(it, modifier = Modifier.padding(top = 4.dp))
+                        Text(it, modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp), 
                         onClick = { onOpenOrder(order.orderId) },
-                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        )
                     ) {
                         Text("Track order", fontWeight = FontWeight.Bold)
                     }
@@ -296,6 +311,7 @@ private fun BuyerOrdersScreen(
 @Composable
 private fun CartScreen(
     state: CartUi,
+    isProcessing: Boolean,
     activeRoute: String,
     marketRoute: String,
     cartRoute: String,
@@ -347,25 +363,26 @@ private fun CartScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 2.dp,
-                    border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = item.productName,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = CharcoalInk
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = item.sourceLabel,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                         Text(
                             text = item.priceLabel,
                             style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                         
@@ -375,28 +392,28 @@ private fun CartScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.4f)),
-                                color = Color.White
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                                color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text("MODE", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 8.sp)
-                                    Text(item.availabilityLabel, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                    Text("MODE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontSize = 8.sp)
+                                    Text(item.availabilityLabel, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.4f)),
-                                color = Color.White
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                                color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text("QTY", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontSize = 8.sp)
-                                    Text(item.quantity.toString(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                    Text("QTY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontSize = 8.sp)
+                                    Text(item.quantity.toString(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
@@ -449,13 +466,13 @@ private fun CartScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 2.dp,
-                    border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Checkout summary", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("${state.totalItems} item(s)", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                        Text("Checkout summary", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("${state.totalItems} item(s)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         
                         Spacer(modifier = Modifier.height(12.dp))
                         
@@ -463,15 +480,15 @@ private fun CartScreen(
                             text = state.totalAmountLabel,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
-                            color = CharcoalInk
+                            color = MaterialTheme.colorScheme.primary
                         )
                         
                         Spacer(modifier = Modifier.height(12.dp))
                         
                         Text(
-                            text = "Payment is mock-only. Cooperative confirmation happens after this step.",
+                            text = "Secure payment powered by Stripe. Cooperative confirmation happens after this step.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                         
                         Spacer(modifier = Modifier.height(24.dp))
@@ -482,12 +499,21 @@ private fun CartScreen(
                                 .fillMaxWidth()
                                 .height(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ForestPrimary,
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
-                            shape = RoundedCornerShape(28.dp)
+                            shape = RoundedCornerShape(28.dp),
+                            enabled = !isProcessing
                         ) {
-                            Text("Confirm checkout", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            if (isProcessing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text("Confirm checkout", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
                         }
                     }
                 }
@@ -516,7 +542,7 @@ private fun OrderDetailScreen(
         }
         item {
             ForestCard {
-                Text(order.orderId, style = MaterialTheme.typography.titleLarge)
+                Text(order.orderId, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -526,16 +552,16 @@ private fun OrderDetailScreen(
                     RouteBadge(label = "Status", value = order.statusLabel)
                     RouteBadge(label = "Type", value = order.typeLabel)
                 }
-                Text(order.totalAmountLabel, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 10.dp))
-                order.dispatchLabel?.let { Text(it, modifier = Modifier.padding(top = 4.dp)) }
+                Text(order.totalAmountLabel, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 10.dp))
+                order.dispatchLabel?.let { Text(it, modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.primary) }
             }
         }
         items(order.items, key = { it.productName + it.quantityLabel }) { item ->
             ForestCard {
-                Text(item.productName, style = MaterialTheme.typography.titleLarge)
-                Text(item.quantityLabel, modifier = Modifier.padding(top = 6.dp))
-                Text(item.sourceLabel, modifier = Modifier.padding(top = 4.dp))
-                item.dispatchLabel?.let { Text(it, modifier = Modifier.padding(top = 4.dp)) }
+                Text(item.productName, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text(item.quantityLabel, modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface)
+                Text(item.sourceLabel, modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                item.dispatchLabel?.let { Text(it, modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.primary) }
             }
         }
     }
@@ -562,9 +588,9 @@ private fun LeaderOrdersContent(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = LeaderSurface,
+                    color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 2.dp,
-                    border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -572,30 +598,30 @@ private fun LeaderOrdersContent(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(order.orderId, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = LeaderPrimary)
+                            Text(order.orderId, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
                             Surface(
-                                color = LeaderHighlight,
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     text = order.statusLabel.uppercase(),
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = LeaderSecondary,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                         
-                        Text(order.summary, modifier = Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                        Text("Buyer: ${order.buyerLabel}", modifier = Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text(order.summary, modifier = Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Buyer: ${order.buyerLabel}", modifier = Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         
                         if (order.dispatchLabel != null) {
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = LeaderAccent, modifier = Modifier.size(14.dp))
+                                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(order.dispatchLabel, style = MaterialTheme.typography.labelSmall, color = LeaderAccent, fontWeight = FontWeight.Bold)
+                                Text(order.dispatchLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                             }
                         }
                         
@@ -696,7 +722,7 @@ private fun EmptyStateCard(
     body: String,
 ) {
     ForestCard {
-        Text(title, style = MaterialTheme.typography.titleLarge)
-        Text(body, modifier = Modifier.padding(top = 8.dp))
+        Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+        Text(body, modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
     }
 }

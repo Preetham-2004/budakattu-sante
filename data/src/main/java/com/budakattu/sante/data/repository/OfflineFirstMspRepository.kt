@@ -28,13 +28,23 @@ class OfflineFirstMspRepository @Inject constructor(
 
     override suspend fun seedDefaultsIfEmpty() {
         // Implementation can check local DB first
+        val now = System.currentTimeMillis()
+        val defaults = listOf(
+            MspRecord("honey", "honey", "Honey", 320f, "BR Hills", now),
+            MspRecord("bamboo-crafts", "bamboo-crafts", "Bamboo Crafts", 450f, "BR Hills", now),
+            MspRecord("herbal-produce", "herbal-produce", "Herbal Produce", 180f, "BR Hills", now),
+            MspRecord("others", "others", "Others", 120f, "BR Hills", now),
+        )
+        mspDao.upsertMspRecords(defaults.map { it.asEntity() })
     }
 
     override suspend fun sync() {
         try {
             val snapshot = firestore.collection(FirestorePaths.MSP_RECORDS).get().await()
             val records = snapshot.documents.mapNotNull { it.toMspRecord() }
-            mspDao.upsertMspRecords(records.map { it.asEntity() })
+            if (records.isNotEmpty()) {
+                mspDao.upsertMspRecords(records.map { it.asEntity() })
+            }
         } catch (_: Exception) {
             // Handle error (offline or firestore error)
         }

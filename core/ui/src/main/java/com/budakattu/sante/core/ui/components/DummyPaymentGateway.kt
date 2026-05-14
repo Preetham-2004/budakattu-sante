@@ -43,7 +43,7 @@ fun DummyPaymentDialog(
     ) {
         Surface(
             shape = RoundedCornerShape(28.dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp,
             modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
@@ -57,9 +57,9 @@ fun DummyPaymentDialog(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.Lock, contentDescription = null, tint = ForestPrimary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("SECURE GATEWAY", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("SECURE GATEWAY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
 
                 Box(
@@ -70,7 +70,7 @@ fun DummyPaymentDialog(
                         PaymentStage.PROCESSING -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(64.dp),
-                                color = ForestPrimary,
+                                color = MaterialTheme.colorScheme.primary,
                                 strokeWidth = 6.dp
                             )
                         }
@@ -102,12 +102,12 @@ fun DummyPaymentDialog(
                         },
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = CharcoalInk
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Amount: $amount",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = ForestPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -116,7 +116,7 @@ fun DummyPaymentDialog(
                     Text(
                         text = "Powered by Razorpay (Test Mode)",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                     )
                 }
             }

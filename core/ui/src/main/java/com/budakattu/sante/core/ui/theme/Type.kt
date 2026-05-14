@@ -12,7 +12,7 @@ val BudakattuTypography = Typography(
         fontWeight = FontWeight.Black,
         fontSize = 32.sp,
         lineHeight = 40.sp,
-        letterSpacing = (-0.5).sp
+        letterSpacing = (-0.5).sp,
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -37,7 +37,7 @@ val BudakattuTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        color = CharcoalInk
+        color = CharcoalInk,
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,

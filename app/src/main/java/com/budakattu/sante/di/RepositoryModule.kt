@@ -10,7 +10,7 @@ import com.budakattu.sante.domain.repository.ProductRepository
 import com.budakattu.sante.domain.repository.SessionRepository
 import com.budakattu.sante.data.repository.FirestoreTraceabilityRepository
 import com.budakattu.sante.domain.repository.TraceabilityRepository
-import com.budakattu.sante.data.repository.MockPaymentGateway
+import com.budakattu.sante.data.repository.StripePaymentGateway
 import com.budakattu.sante.domain.repository.PaymentGateway
 import com.budakattu.sante.data.repository.OfflineFirstMspRepository
 import com.budakattu.sante.domain.repository.MspRepository
@@ -28,7 +28,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPaymentGateway(
-        mockPaymentGateway: MockPaymentGateway,
+        stripePaymentGateway: StripePaymentGateway,
     ): PaymentGateway
 
     @Binds

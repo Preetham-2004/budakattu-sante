@@ -6,45 +6,28 @@ import androidx.compose.ui.graphics.Color
 val LeaderPrimary = Color(0xFF8D5E44) // Deep Earthy Copper
 val LeaderSecondary = Color(0xFF53606B) // Professional Stone Blue
 val LeaderAccent = Color(0xFFD4A373) // Warm Ochre
-val LeaderSurface = Color(0xFFFFFFFF)
-val LeaderBackground = Color(0xFFF7F6F2) // Very soft warm grey
-val LeaderHighlight = Color(0xFFE9EDC9) // Soft sage highlight
+val LeaderBackground = Color(0xFFFFFFFF) // Pure White
+val LeaderHighlight = Color(0xFFF1F3F5)
 val LeaderError = Color(0xFFBC4749)
-
-// Legacy compatibility names
-val Parchment = LeaderBackground
-val SageMuted = Color(0xFF7D8C69)
-val ClayMuted = Color(0xFFB68D7E)
-val StoneWarm = Color(0xFFA49382)
-val IvorySoft = Color(0xFFFBF9F4)
-val GoldSubtle = Color(0xFFC5A059)
 
 // Core Brand Aliases (Applied to all roles)
 val ForestPrimary = LeaderPrimary
-val TraditionalPrimary = LeaderPrimary
-val TraditionalSecondary = LeaderSecondary
+val TraditionalBackground = Color(0xFFFFFFFF) // Pure White Background
+val ForestBackground = Color(0xFFFFFFFF)
+val TraditionalSurface = Color(0xFFFFFFFF) // White Surface
+val CharcoalInk = Color(0xFF121826) // Deep Slate Contrast Text (Eye catchy, not poky)
+
 val LeafAccent = LeaderSecondary
+val BarkBrown = Color(0xFF212121)
+val MistVeil = Color(0xFFDEE2E6) // Light grey for dividers
 val AmberHarvest = LeaderAccent
-val TraditionalBackground = LeaderBackground
-val ForestBackground = LeaderBackground
-val TraditionalSurface = LeaderSurface
-val MossSurface = Color(0xFFFFFFFF)
-val BarkBrown = Color(0xFF5D544F)
-val CharcoalInk = Color(0xFF4A4A4A)
-val ClayBorder = Color(0xFFE8E4DE)
-val MilletGold = Color(0xFFD8C4A0)
-val MistVeil = Color(0xFFF2F0EB)
+val TraditionalSecondary = Color(0xFFDEE2E6)
 
 val MspSafe = Color(0xFF6B7B56)
 val MspDanger = Color(0xFFBD7D7D)
 
 // Accents
 val SunsetClay = LeaderPrimary
-val DeepForest = Color(0xFF4A523D)
-val GoldLustre = LeaderAccent
-val GlassWhite = Color(0xAAFFFFFF)
-val ShadowBrown = Color(0x08000000)
-val SoftMoss = Color(0xFFECF0E6)
 
 // Supporting Greys
 val TextDark = CharcoalInk

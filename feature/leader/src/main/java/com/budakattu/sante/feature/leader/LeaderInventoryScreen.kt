@@ -28,28 +28,28 @@ import com.budakattu.sante.core.ui.components.LeaderScaffold
 import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.Product
 
-// Earthy, fresh theme colors for the inventory screen
-private val CardBackground = Color(0xFFFEF7E8)      // Warm off-white
-private val AccentForest = Color(0xFF2D6A4F)        // Deep forest green
-private val AccentWarm = Color(0xFFE9C46A)          // Golden sand
-private val WarningRed = Color(0xFFE63946)           // Alert red
-private val LowStockBg = Color(0xFFFFE5E5)           // Soft red tint
-private val TextDark = Color(0xFF2F3E46)             // Dark slate
-private val TextMuted = Color(0xFF6C757D)            // Muted grey
-private val DividerColor = Color(0xFFEAE0D5)         // Soft beige divider
+// Clean white theme colors for the inventory screen
+private val CardBackground = Color(0xFFFFFFFF)      // Pure White
+private val AccentForest = Color(0xFF2D6A4F)        // Deep forest green for light bg
+private val AccentWarm = Color(0xFF8D5E44)          // Brand Primary Copper
+private val WarningRed = Color(0xFFE63946)          // Soft alert red
+private val LowStockBg = Color(0xFFFFF0F0)          // Very light red tint
+private val TextDark = CharcoalInk                  // Deep slate contrast text
+private val TextMuted = Color(0xFF6C757D)           // Medium grey
+private val DividerColor = Color(0xFFF1F3F5)        // Light grey divider
 
 @Composable
 fun LeaderInventoryRoute(
     onBack: () -> Unit,
     onAddProduct: () -> Unit,
-    viewModel: LeaderInventoryViewModel = hiltViewModel()
+    viewModel: LeaderInventoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LeaderInventoryScreen(
         uiState = uiState,
         onBack = onBack,
-        onAddProduct = onAddProduct
+        onAddProduct = onAddProduct,
     )
 }
 
@@ -67,8 +67,8 @@ private fun LeaderInventoryScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddProduct,
-                containerColor = AccentForest,
-                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp),
                 elevation = FloatingActionButtonDefaults.elevation(6.dp)
             ) {
@@ -114,7 +114,7 @@ private fun LeaderInventoryScreen(
 
 @Composable
 private fun InventoryManagementCard(product: Product) {
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(value = false) }
     val isBelowMsp = product.pricePerUnit < product.mspPerUnit
     val isLowStock = product.availableStock < 10
 
@@ -123,7 +123,7 @@ private fun InventoryManagementCard(product: Product) {
             .fillMaxWidth()
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

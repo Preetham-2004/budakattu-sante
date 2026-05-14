@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class LeaderProductFormViewModel @Inject constructor(
     private val addProductUseCase: AddProductUseCase,
     private val getProductUseCase: GetProductUseCase,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val productId: String? = savedStateHandle["productId"]
 
@@ -31,9 +31,7 @@ class LeaderProductFormViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     init {
-        if (productId != null) {
-            loadProduct(productId)
-        }
+        productId?.let { loadProduct(it) }
     }
 
     private fun loadProduct(id: String) {

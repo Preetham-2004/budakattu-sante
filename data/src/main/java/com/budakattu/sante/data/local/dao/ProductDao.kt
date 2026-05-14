@@ -14,6 +14,9 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE productId = :productId")
     fun observeProduct(productId: String): Flow<ProductEntity?>
 
+    @Query("SELECT COUNT(*) FROM products")
+    suspend fun getProductCount(): Int
+
     @Upsert
     suspend fun upsertProducts(products: List<ProductEntity>)
 

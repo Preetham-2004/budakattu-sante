@@ -8,8 +8,9 @@ import com.budakattu.sante.domain.model.CartItem
 import com.budakattu.sante.domain.model.Order
 import com.budakattu.sante.domain.model.OrderItem
 import com.budakattu.sante.domain.model.OrderStatus
-import com.budakattu.sante.domain.model.OrderType
 import com.budakattu.sante.domain.model.SessionState
+import com.budakattu.sante.domain.repository.PaymentGateway
+import com.budakattu.sante.domain.repository.PaymentResult
 import com.budakattu.sante.domain.usecase.order.CheckoutUseCase
 import com.budakattu.sante.domain.usecase.order.ObserveBuyerOrdersUseCase
 import com.budakattu.sante.domain.usecase.order.ObserveCartUseCase
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -41,19 +41,30 @@ class CartViewModel @Inject constructor(
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private val removeCartItemUseCase: RemoveCartItemUseCase,
     private val checkoutUseCase: CheckoutUseCase,
+    private val paymentGateway: PaymentGateway,
 ) : ViewModel() {
     private val sessionState = observeSessionUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.Loading)
 
+    private val _isProcessing = MutableStateFlow(value = false)
+
     val uiState = sessionState.flatMapLatest { session ->
         when (session) {
             is SessionState.LoggedIn -> observeCartUseCase(session.userId)
-                .flatMapLatest { cart -> flowOf(cart.toUiState()) }
+                .flatMapLatest { cart -> 
+                    _isProcessing.flatMapLatest { processing ->
+                        flowOf(cart.toUiState(processing)) 
+                    }
+                }
                 .catch { emit(CartUiState.Error(it.localizedMessage ?: "Unable to load cart")) }
             SessionState.Loading -> flowOf(CartUiState.Loading)
             is SessionState.LoggedOut -> flowOf(CartUiState.Unauthenticated)
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CartUiState.Loading)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = CartUiState.Loading,
+    )
 
     private val _events = MutableSharedFlow<CartEvent>()
     val events = _events.asSharedFlow()
@@ -70,7 +81,7 @@ class CartViewModel @Inject constructor(
 
     fun removeItem(itemId: String) {
         viewModelScope.launch {
-            val session = sessionState.value as? SessionState.LoggedIn ?: return@launch
+            val session = (sessionState.value as? SessionState.LoggedIn) ?: return@launch
             runCatching {
                 removeCartItemUseCase(session.userId, itemId)
             }.onFailure { error ->
@@ -81,20 +92,51 @@ class CartViewModel @Inject constructor(
 
     fun checkout() {
         viewModelScope.launch {
-            val session = sessionState.value as? SessionState.LoggedIn ?: return@launch
+            val session = (sessionState.value as? SessionState.LoggedIn) ?: return@launch
+            _isProcessing.value = true
+            _events.emit(CartEvent.ShowMessage("Initializing secure payment..."))
+            
             runCatching {
-                checkoutUseCase(session.userId)
-            }.onSuccess { result ->
-                _events.emit(CartEvent.NavigateToConfirmation(result.orderId))
+                // 1. Create order in Firestore
+                val result = checkoutUseCase(session.userId)
+                
+                // 2. Calculate amount (simplified here, in real app get from result or cart)
+                val cart = (uiState.value as? CartUiState.Content)?.cart
+                val amount = cart?.items?.sumOf { cartItem -> 
+                    val price = cartItem.priceLabel.filter { (it.isDigit() || it == '.') }.toDoubleOrNull() ?: 0.0
+                    cartItem.quantity * price
+                } ?: 0.0
+                
+                // 3. Initiate "Legit" Payment
+                val paymentResult = paymentGateway.initiatePayment(
+                    amount = amount,
+                    orderId = result.orderId,
+                    customerName = session.name,
+                    customerEmail = session.email,
+                    customerPhone = session.phoneNumber,
+                )
+                
+                when (paymentResult) {
+                    is PaymentResult.Success -> {
+                        _events.emit(CartEvent.NavigateToConfirmation(result.orderId))
+                    }
+                    is PaymentResult.Failure -> {
+                        _events.emit(CartEvent.ShowMessage("Payment failed: ${paymentResult.message}"))
+                    }
+                    PaymentResult.Cancelled -> {
+                        _events.emit(CartEvent.ShowMessage("Payment cancelled"))
+                    }
+                }
             }.onFailure { error ->
-                _events.emit(CartEvent.ShowMessage(error.localizedMessage ?: "Checkout failed"))
+                _events.emit(CartEvent.ShowMessage("Checkout failed: ${error.localizedMessage}"))
             }
+            _isProcessing.value = false
         }
     }
 
     private fun updateQuantity(itemId: String, quantity: Int) {
         viewModelScope.launch {
-            val session = sessionState.value as? SessionState.LoggedIn ?: return@launch
+            val session = (sessionState.value as? SessionState.LoggedIn) ?: return@launch
             runCatching {
                 updateCartItemQuantityUseCase(session.userId, itemId, quantity)
             }.onFailure { error ->
@@ -162,8 +204,10 @@ class LeaderOrdersViewModel @Inject constructor(
                     .flatMapLatest { orders ->
                         flowOf<LeaderOrdersUiState>(
                             LeaderOrdersUiState.Content(
-                                orders.filter { it.status != OrderStatus.COMPLETED && it.status != OrderStatus.CANCELLED }
-                                    .map(::toLeaderOrderUi),
+                                orders.asSequence()
+                                    .filter { it.status != OrderStatus.COMPLETED && it.status != OrderStatus.CANCELLED }
+                                    .map(::toLeaderOrderUi)
+                                    .toList(),
                             ),
                         )
                     }
@@ -192,7 +236,10 @@ sealed interface CartUiState {
     data object Unauthenticated : CartUiState
     data object Empty : CartUiState
     data class Error(val message: String) : CartUiState
-    data class Content(val cart: CartUi) : CartUiState
+    data class Content(
+        val cart: CartUi,
+        val isProcessing: Boolean = false,
+    ) : CartUiState
 }
 
 sealed interface BuyerOrdersUiState {
@@ -271,7 +318,7 @@ data class LeaderOrderUi(
     val dispatchLabel: String?,
 )
 
-private fun Cart?.toUiState(): CartUiState {
+private fun Cart?.toUiState(isProcessing: Boolean = false): CartUiState {
     if (this == null || items.isEmpty()) return CartUiState.Empty
     val totalAmount = items.sumOf { it.quantity * it.pricePerUnit.toDouble() }
     val totalCount = items.sumOf { it.quantity }
@@ -281,6 +328,7 @@ private fun Cart?.toUiState(): CartUiState {
             totalItems = totalCount,
             totalAmountLabel = "Rs ${totalAmount.toInt()}",
         ),
+        isProcessing = isProcessing,
     )
 }
 

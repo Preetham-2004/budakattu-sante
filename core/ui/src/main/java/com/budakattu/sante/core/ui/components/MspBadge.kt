@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.budakattu.sante.core.ui.theme.MspDanger
 import com.budakattu.sante.core.ui.theme.MspSafe
@@ -28,7 +29,8 @@ fun MspBadge(
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = Color.White,
+            color = Color.White, // Keeping white text on colored background
+            fontWeight = FontWeight.Black,
         )
     }
 }

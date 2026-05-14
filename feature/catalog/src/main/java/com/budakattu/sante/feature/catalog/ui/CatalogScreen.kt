@@ -4,7 +4,6 @@ import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,10 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.*
-import com.budakattu.sante.core.ui.theme.BarkBrown
 import com.budakattu.sante.core.ui.theme.ForestPrimary
-import com.budakattu.sante.core.ui.theme.ForestBackground
-import com.budakattu.sante.core.ui.theme.SunsetClay
 import com.budakattu.sante.feature.catalog.viewmodel.ProductListViewModel
 import com.budakattu.sante.feature.catalog.viewmodel.SupportChatViewModel
 
@@ -43,14 +39,14 @@ fun CatalogRoute(
     paymentSuccess: Boolean = false,
     onClearPaymentSuccess: () -> Unit = {},
     viewModel: ProductListViewModel = hiltViewModel(),
-    chatViewModel: SupportChatViewModel = hiltViewModel()
+    chatViewModel: SupportChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatMessages by chatViewModel.messages.collectAsStateWithLifecycle()
     val isTyping by chatViewModel.isTyping.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
-    var showChat by remember { mutableStateOf(false) }
+    var showChat by remember { mutableStateOf(value = false) }
 
     LaunchedEffect(paymentSuccess) {
         if (paymentSuccess) {
@@ -60,11 +56,10 @@ fun CatalogRoute(
     }
 
     val speechLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val spokenText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-            if (spokenText != null) {
+            result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { spokenText ->
                 chatViewModel.sendMessage(spokenText)
             }
         }
@@ -85,8 +80,7 @@ fun CatalogRoute(
             onProductClick = viewModel::onProductClick,
             onOpenRoute = onOpenRoute,
             onBack = onBack,
-            onOpenChat = { showChat = true }
-        )
+        ) { showChat = true }
 
         if (showChat) {
             SupportChatBottomSheet(
@@ -101,7 +95,7 @@ fun CatalogRoute(
                     speechLauncher.launch(intent)
                 },
                 messages = chatMessages,
-                isTyping = isTyping
+                isTyping = isTyping,
             )
         }
     }
@@ -123,11 +117,11 @@ fun CatalogScreen(
         showBack = true,
         onBack = onBack,
         topBarContent = {
-            if (successState != null && successState.userName != null) {
+            if ((successState != null) && (successState.userName != null)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AsyncImage(
@@ -136,16 +130,16 @@ fun CatalogScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.2f)),
-                            contentScale = ContentScale.Crop
+                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
+                            contentScale = ContentScale.Crop,
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 text = "Namaste, ${successState.userName}",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
                             )
                         }
                     }
@@ -166,7 +160,6 @@ fun CatalogScreen(
                 is ProductListUiState.Error -> ErrorState(innerPadding, contentPadding, uiState.message)
                 is ProductListUiState.Success -> ProductGrid(
                     products = uiState.products,
-                    isOffline = uiState.isOffline,
                     outerPadding = innerPadding,
                     innerPadding = contentPadding,
                     onProductClick = onProductClick,
@@ -210,7 +203,6 @@ private fun ErrorState(outerPadding: PaddingValues, innerPadding: PaddingValues,
 @Composable
 private fun ProductGrid(
     products: List<ProductUiModel>,
-    isOffline: Boolean,
     outerPadding: PaddingValues,
     innerPadding: PaddingValues,
     onProductClick: (String) -> Unit,
@@ -238,7 +230,9 @@ private fun ProductGrid(
         }
 
         items(items = products, key = { it.id }) { product ->
-            ProductGridItem(product = product, onClick = { onProductClick(product.id) })
+            ProductGridItem(product = product) {
+                onProductClick(product.id)
+            }
         }
     }
 }
@@ -256,8 +250,8 @@ private fun SearchBar() {
         ) {
             Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Search forest products...", color = Color.Gray, modifier = Modifier.weight(1f))
-            Icon(Icons.Default.Tune, contentDescription = null, tint = ForestPrimary)
+            Text("Search forest products...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.weight(1f))
+            Icon(Icons.Default.Tune, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -270,7 +264,7 @@ private fun ProductGridItem(
     Surface(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
     ) {
         Column {
@@ -283,7 +277,7 @@ private fun ProductGridItem(
                 )
                 if (product.ctaLabel == "Pre-book") {
                     Surface(
-                        color = SunsetClay,
+                        color = MaterialTheme.colorScheme.tertiary,
                         shape = RoundedCornerShape(bottomEnd = 12.dp),
                         modifier = Modifier.align(Alignment.TopStart)
                     ) {
@@ -291,7 +285,7 @@ private fun ProductGridItem(
                             text = "PRE-BOOK",
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onTertiary,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -305,13 +299,14 @@ private fun ProductGridItem(
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
                     text = product.categoryName,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -322,13 +317,13 @@ private fun ProductGridItem(
                     Text(
                         text = product.priceLabel.substringBefore("/"),
                         style = MaterialTheme.typography.titleLarge,
-                        color = ForestPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
                         text = "/" + product.priceLabel.substringAfter("/"),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
             }

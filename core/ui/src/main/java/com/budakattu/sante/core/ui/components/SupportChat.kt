@@ -1,6 +1,5 @@
 package com.budakattu.sante.core.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,10 +7,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,9 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.budakattu.sante.core.ui.theme.ForestPrimary
-import com.budakattu.sante.core.ui.theme.LeaderPrimary
 import com.budakattu.sante.core.ui.theme.MistVeil
 
 data class ChatMessage(
@@ -45,7 +41,7 @@ fun SupportChatBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(
@@ -64,21 +60,21 @@ fun SupportChatBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ForestPrimary, modifier = Modifier.size(24.dp))
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         "Tribal Sante Assistant",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = ForestPrimary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onDismissRequest) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
 
-            Divider(color = MistVeil.copy(alpha = 0.5f))
+            HorizontalDivider(color = MistVeil.copy(alpha = 0.5f))
 
             // Chat Messages
             LazyColumn(
@@ -102,7 +98,7 @@ fun SupportChatBottomSheet(
             // Input Bar
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 tonalElevation = 8.dp,
                 shadowElevation = 16.dp
             ) {
@@ -116,12 +112,14 @@ fun SupportChatBottomSheet(
                         value = textState,
                         onValueChange = { textState = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Ask about products...") },
+                        placeholder = { Text("Ask about products...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MistVeil,
-                            unfocusedContainerColor = MistVeil,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = RoundedCornerShape(24.dp),
                         maxLines = 3
@@ -134,9 +132,9 @@ fun SupportChatBottomSheet(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(MistVeil)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                     ) {
-                        Icon(Icons.Default.Mic, contentDescription = "Voice", tint = ForestPrimary)
+                        Icon(Icons.Default.Mic, contentDescription = "Voice", tint = MaterialTheme.colorScheme.primary)
                     }
                     
                     Spacer(modifier = Modifier.width(8.dp))
@@ -151,9 +149,9 @@ fun SupportChatBottomSheet(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(ForestPrimary)
+                            .background(MaterialTheme.colorScheme.primary)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Send", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
@@ -164,8 +162,8 @@ fun SupportChatBottomSheet(
 @Composable
 private fun ChatBubble(message: ChatMessage) {
     val alignment = if (message.isFromUser) Alignment.End else Alignment.Start
-    val color = if (message.isFromUser) ForestPrimary else MistVeil
-    val textColor = if (message.isFromUser) Color.White else Color.Black
+    val color = if (message.isFromUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (message.isFromUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
     val shape = if (message.isFromUser) {
         RoundedCornerShape(16.dp, 16.dp, 0.dp, 16.dp)
     } else {
@@ -194,7 +192,7 @@ private fun ChatBubble(message: ChatMessage) {
 @Composable
 private fun TypingIndicator() {
     Surface(
-        color = MistVeil,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 0.dp),
         modifier = Modifier.padding(end = 64.dp)
     ) {
@@ -202,7 +200,7 @@ private fun TypingIndicator() {
             text = "Typing...",
             modifier = Modifier.padding(12.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
     }
 }
@@ -211,8 +209,8 @@ private fun TypingIndicator() {
 fun SupportChatFAB(onClick: () -> Unit) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = ForestPrimary,
-        contentColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
         shape = CircleShape
     ) {
         Icon(Icons.Default.AutoAwesome, contentDescription = "AI Assistant")

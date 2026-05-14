@@ -1,11 +1,9 @@
 package com.budakattu.sante.feature.leader
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
@@ -14,9 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +22,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.components.LeaderScaffold
-import com.budakattu.sante.core.ui.theme.*
 import com.budakattu.sante.domain.model.ProductAvailability
 
 @Composable
@@ -112,29 +107,29 @@ private fun LeaderProductEntryScreen(
         title = if (uiState.isEditMode) "Edit Listing" else "Traditional Listing",
         subtitle = "Formal registration of forest produce and logistics.",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
     ) { outerPadding ->
         Scaffold(
             containerColor = Color.Transparent,
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             bottomBar = {
                 Surface(
-                    color = LeaderSurface,
+                    color = MaterialTheme.colorScheme.surface,
                     tonalElevation = 8.dp,
                     shadowElevation = 16.dp,
-                    border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp).navigationBarsPadding(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         OutlinedButton(
                             onClick = onSaveDraft,
                             modifier = Modifier.weight(1f).height(56.dp),
                             shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.3f))
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
                         ) {
-                            Text("SAVE DRAFT", color = LeaderSecondary, fontWeight = FontWeight.Bold)
+                            Text("SAVE DRAFT", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                         
                         Button(
@@ -142,13 +137,13 @@ private fun LeaderProductEntryScreen(
                             modifier = Modifier.weight(1.5f).height(56.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = LeaderPrimary,
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
                             ),
-                            enabled = !uiState.isSaving
+                            enabled = !uiState.isSaving,
                         ) {
                             if (uiState.isSaving) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             } else {
                                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -178,15 +173,15 @@ private fun LeaderProductEntryScreen(
                                 Surface(
                                     modifier = Modifier.weight(1f).clickable { onAvailabilityChange(option) },
                                     shape = RoundedCornerShape(12.dp),
-                                    color = if (selected) LeaderPrimary.copy(alpha = 0.1f) else Color.White,
-                                    border = BorderStroke(1.dp, if (selected) LeaderPrimary else LeaderSecondary.copy(alpha = 0.2f))
+                                    color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface,
+                                    border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                                 ) {
                                     Text(
                                         text = option.name.replace("_", "\n"),
                                         modifier = Modifier.padding(vertical = 12.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         textAlign = TextAlign.Center,
-                                        color = if (selected) LeaderPrimary else Color.Gray,
+                                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                         fontWeight = if (selected) FontWeight.Black else FontWeight.Medium,
                                         lineHeight = 12.sp
                                     )
@@ -202,15 +197,15 @@ private fun LeaderProductEntryScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Enable Pre-booking", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = CharcoalInk)
-                                Text("Allows buyers to reserve upcoming harvests.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                Text("Enable Pre-booking", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Allows buyers to reserve upcoming harvests.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             }
                             Switch(
                                 checked = uiState.isPrebookEnabled,
                                 onCheckedChange = onPrebookEnabledChange,
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = LeaderPrimary,
-                                    checkedTrackColor = LeaderPrimary.copy(alpha = 0.3f)
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                 )
                             )
                         }
@@ -222,7 +217,7 @@ private fun LeaderProductEntryScreen(
                         ManagementTextField("Product Name", uiState.name, onNameChange, "e.g. Wild Forest Honey")
                         
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Category", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = LeaderSecondary)
+                        Text("Category", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -235,8 +230,8 @@ private fun LeaderProductEntryScreen(
                                     label = { Text(cat) },
                                     modifier = Modifier.weight(1f),
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = LeaderSecondary,
-                                        selectedLabelColor = Color.White
+                                        selectedContainerColor = MaterialTheme.colorScheme.secondary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onSecondary
                                     )
                                 )
                             }
@@ -250,11 +245,11 @@ private fun LeaderProductEntryScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Accessibility Audio", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = LeaderSecondary)
+                            Text("Accessibility Audio", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                             TextButton(onClick = onAutofillAudio) {
-                                Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = LeaderPrimary)
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("GENERATE SCRIPT", style = MaterialTheme.typography.labelSmall, color = LeaderPrimary, fontWeight = FontWeight.Bold)
+                                Text("GENERATE SCRIPT", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                             }
                         }
                         ManagementTextField("", uiState.audioDescription, onAudioDescriptionChange, "Spoken description script...", minLines = 2)
@@ -293,18 +288,18 @@ private fun LeaderProductEntryScreen(
                             Checkbox(
                                 checked = uiState.isVisible, 
                                 onCheckedChange = onVisibilityChange,
-                                colors = CheckboxDefaults.colors(checkedColor = LeaderPrimary)
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
                             )
-                            Text("Make visible in marketplace immediately", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
+                            Text("Make visible in marketplace immediately", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                         
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
                                 checked = uiState.notifyBuyers, 
                                 onCheckedChange = onNotifyBuyersChange,
-                                colors = CheckboxDefaults.colors(checkedColor = LeaderPrimary)
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
                             )
-                            Text("Notify interested buyers", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
+                            Text("Notify interested buyers", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -317,7 +312,7 @@ private fun LeaderProductEntryScreen(
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().height(160.dp),
-                                color = LeaderBackground
+                                color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 AsyncImage(
                                     model = uiState.imageUrl,
@@ -338,11 +333,11 @@ private fun ManagementFormSection(title: String, content: @Composable () -> Unit
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = LeaderSurface,
-        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.05f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(text = title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black, color = LeaderPrimary, letterSpacing = 1.sp)
+            Text(text = title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(16.dp))
             content()
         }
@@ -359,20 +354,20 @@ private fun ManagementTextField(
 ) {
     Column(modifier = Modifier.padding(top = 12.dp)) {
         if (label.isNotEmpty()) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = LeaderSecondary.copy(alpha = 0.8f))
+            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
         }
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-            placeholder = { Text(placeholder, color = Color.LightGray, style = MaterialTheme.typography.bodySmall) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), style = MaterialTheme.typography.bodySmall) },
             shape = RoundedCornerShape(12.dp),
             textStyle = MaterialTheme.typography.bodyMedium,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LeaderPrimary,
-                unfocusedBorderColor = LeaderSecondary.copy(alpha = 0.2f),
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
             ),
             minLines = minLines
         )

@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -64,7 +65,7 @@ fun BuyerAssistantRoute(
             }
             item {
                 ForestCard {
-                    Text("Assistant chat", style = MaterialTheme.typography.titleLarge)
+                    Text("Assistant chat", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                     OutlinedTextField(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -88,17 +89,19 @@ fun BuyerAssistantRoute(
                     Text(
                         "Gemini API key placeholder is configured in the data module build file. This screen falls back to local responses until a real key is wired.",
                         modifier = Modifier.padding(top = 10.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
             }
             item {
                 ForestCard {
-                    Text("Assistant reply", style = MaterialTheme.typography.titleLarge)
-                    Text(uiState.reply, modifier = Modifier.padding(top = 8.dp))
+                    Text("Assistant reply", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.secondary)
+                    Text(uiState.reply, modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface)
                 }
             }
             item {
-                Text("Seasonal recommendations", style = MaterialTheme.typography.titleLarge)
+                Text("Seasonal recommendations", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
             }
             items(uiState.recommendations, key = { it.title }) { recommendation ->
                 RecommendationCard(recommendation)
@@ -110,9 +113,9 @@ fun BuyerAssistantRoute(
 @Composable
 private fun RecommendationCard(recommendation: SeasonalRecommendation) {
     ForestCard {
-        Text(recommendation.title, style = MaterialTheme.typography.titleLarge)
-        Text(recommendation.summary, modifier = Modifier.padding(top = 6.dp))
-        Text(recommendation.actionHint, modifier = Modifier.padding(top = 6.dp))
+        Text(recommendation.title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+        Text(recommendation.summary, modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface)
+        Text(recommendation.actionHint, modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
     }
 }
 

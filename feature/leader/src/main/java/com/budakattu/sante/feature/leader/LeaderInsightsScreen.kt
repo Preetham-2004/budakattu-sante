@@ -90,22 +90,22 @@ private fun PerformanceDashboardCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = LeaderSurface,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 3.dp,
-        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(LeaderHighlight, CircleShape),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ShowChart, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(18.dp))
+                    Icon(Icons.AutoMirrored.Filled.ShowChart, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("Growth Trajectory", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = CharcoalInk)
+                Text("Growth Trajectory", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -122,12 +122,12 @@ private fun PerformanceDashboardCard() {
 @Composable
 private fun DataColumn(label: String, value: String, change: String) {
     Column {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
-        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = LeaderPrimary)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Bold)
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
         Text(
             change, 
             style = MaterialTheme.typography.labelSmall, 
-            color = if (change.startsWith("+")) LeaderSecondary else LeaderAccent,
+            color = if (change.startsWith("+")) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
             fontWeight = FontWeight.Bold
         )
     }
@@ -138,8 +138,8 @@ private fun TrendAnalyticCard(title: String, insight: String, icon: ImageVector,
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = LeaderSurface,
-        border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
             Surface(
@@ -153,9 +153,9 @@ private fun TrendAnalyticCard(title: String, insight: String, icon: ImageVector,
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = CharcoalInk)
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(insight, style = MaterialTheme.typography.bodySmall, color = Color.Gray, lineHeight = 18.sp)
+                Text(insight, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), lineHeight = 18.sp)
             }
         }
     }
@@ -166,18 +166,18 @@ private fun ImpactMetricsCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = LeaderSecondary,
+        color = MaterialTheme.colorScheme.secondary,
         shadowElevation = 4.dp
     ) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Diversity3, contentDescription = null, tint = LeaderHighlight, modifier = Modifier.size(32.dp))
+            Icon(Icons.Default.Diversity3, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary, modifier = Modifier.size(32.dp))
             Spacer(modifier = Modifier.width(20.dp))
             Column {
-                Text("Collective Impact", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = Color.White)
+                Text("Collective Impact", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSecondary)
                 Text(
                     "12 tribal families empowered through your cooperative this harvest cycle.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.8f)
                 )
             }
         }

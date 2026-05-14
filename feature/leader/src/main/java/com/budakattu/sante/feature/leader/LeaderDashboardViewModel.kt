@@ -6,10 +6,12 @@ import com.budakattu.sante.domain.model.OrderStatus
 import com.budakattu.sante.domain.model.SessionState
 import com.budakattu.sante.domain.usecase.order.ObserveLeaderOrdersUseCase
 import com.budakattu.sante.domain.usecase.product.GetProductsUseCase
+import com.budakattu.sante.domain.usecase.product.SyncProductsUseCase
 import com.budakattu.sante.domain.usecase.session.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -17,8 +19,15 @@ import javax.inject.Inject
 class LeaderDashboardViewModel @Inject constructor(
     observeSessionUseCase: ObserveSessionUseCase,
     getProductsUseCase: GetProductsUseCase,
-    observeLeaderOrdersUseCase: ObserveLeaderOrdersUseCase
+    observeLeaderOrdersUseCase: ObserveLeaderOrdersUseCase,
+    private val syncProductsUseCase: SyncProductsUseCase,
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            syncProductsUseCase()
+        }
+    }
 
     val uiState: StateFlow<LeaderDashboardUiState> = observeSessionUseCase()
         .flatMapLatest { session ->

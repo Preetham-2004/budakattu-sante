@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,11 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.budakattu.sante.core.ui.theme.*
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Leaderboard
-import androidx.compose.material3.*
 
 @Composable
 fun HeritageScaffold(
@@ -44,22 +42,25 @@ fun HeritageScaffold(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                    .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)),
             ) {
                 AsyncImage(
                     model = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560",
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(LeaderPrimary.copy(alpha = 0.7f), LeaderPrimary.copy(alpha = 0.95f)),
-                            )
-                        )
+                                colors = listOf(
+                                    LeaderPrimary.copy(alpha = 0.7f),
+                                    LeaderPrimary.copy(alpha = 0.95f),
+                                ),
+                            ),
+                        ),
                 )
                 
                 if (topBarContent != null) {
@@ -73,9 +74,9 @@ fun HeritageScaffold(
                             .padding(12.dp)
                             .align(Alignment.TopStart)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
@@ -94,14 +95,14 @@ fun HeritageScaffold(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.headlineMedium,
-                        color = LeaderPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 26.sp
                     )
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = LeaderSecondary.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         letterSpacing = 0.sp
                     )
                 }
@@ -136,7 +137,7 @@ fun LeaderScaffold(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
             ) {
                 AsyncImage(
                     model = "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2560",
@@ -165,15 +166,15 @@ fun LeaderScaffold(
                             .padding(12.dp)
                             .align(Alignment.TopStart)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
                 
                 // Management Tag
                 Surface(
-                    color = LeaderAccent,
+                    color = MaterialTheme.colorScheme.tertiary,
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
                 ) {
@@ -181,9 +182,9 @@ fun LeaderScaffold(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Leaderboard, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
+                        Icon(Icons.Default.Leaderboard, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiary, modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("MANAGEMENT", style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("MANAGEMENT", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -202,14 +203,14 @@ fun LeaderScaffold(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.headlineMedium,
-                        color = LeaderPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 24.sp
                     )
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = LeaderSecondary.copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -227,13 +228,13 @@ fun RouteBadge(
     label: String, 
     value: String,
     modifier: Modifier = Modifier,
-    color: Color = TraditionalPrimary
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = TraditionalSurface,
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.2f)),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
         shadowElevation = 2.dp
     ) {
         Column(
@@ -244,7 +245,7 @@ fun RouteBadge(
             Text(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = CharcoalInk.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 fontSize = 9.sp
             )

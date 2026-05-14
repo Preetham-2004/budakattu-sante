@@ -162,8 +162,8 @@ private fun LeaderTraceabilityContent(
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = LeaderPrimary,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text("REGISTER FAMILY", fontWeight = FontWeight.Bold)
@@ -173,7 +173,7 @@ private fun LeaderTraceabilityContent(
 
         item {
             TraceabilityCard(title = "New Supply Log", icon = Icons.Default.HistoryEdu) {
-                Text("Associated Product", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text("Associated Product", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Bold)
                 SelectionRow(
                     items = state.products.map { it.productId to it.name },
                     selectedId = formState.selectedProductId,
@@ -181,7 +181,7 @@ private fun LeaderTraceabilityContent(
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("Supplying Family", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text("Supplying Family", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Bold)
                 SelectionRow(
                     items = state.families.map { it.familyId to it.familyName },
                     selectedId = formState.selectedFamilyId,
@@ -200,8 +200,8 @@ private fun LeaderTraceabilityContent(
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = LeaderSecondary,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
                     Text("CREATE LOG", fontWeight = FontWeight.Bold)
@@ -224,14 +224,14 @@ private fun TraceabilityCard(title: String, icon: androidx.compose.ui.graphics.v
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = LeaderSurface,
-        border = BorderStroke(1.dp, LeaderSecondary.copy(alpha = 0.05f))
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = LeaderPrimary, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = CharcoalInk)
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
             Spacer(modifier = Modifier.height(16.dp))
             content()
@@ -244,14 +244,16 @@ private fun TraceField(label: String, value: String, onValueChange: (String) -> 
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+        label = { Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)) },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         textStyle = MaterialTheme.typography.bodyMedium,
         shape = RoundedCornerShape(10.dp),
         minLines = minLines,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = LeaderPrimary,
-            unfocusedBorderColor = LeaderSecondary.copy(alpha = 0.2f)
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
         )
     )
 }
@@ -268,8 +270,9 @@ private fun SelectionRow(items: List<Pair<String, String>>, selectedId: String?,
                 onClick = { onSelected(id) },
                 label = { Text(name) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = LeaderPrimary,
-                    selectedLabelColor = Color.White
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    labelColor = MaterialTheme.colorScheme.onSurface,
                 )
             )
         }
@@ -281,22 +284,22 @@ private fun LogItem(log: SupplyLog) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = LeaderSurface,
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.1f))
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(log.productName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = LeaderPrimary)
-                Text(log.harvestDate, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(log.productName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text(log.harvestDate, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
-            Text("From: ${log.familyName}", style = MaterialTheme.typography.bodySmall, color = CharcoalInk)
+            Text("From: ${log.familyName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(4.dp))
-            Surface(color = LeaderHighlight, shape = RoundedCornerShape(4.dp)) {
+            Surface(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), shape = RoundedCornerShape(4.dp)) {
                 Text(
                     text = "BATCH: ${log.batchId}",
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = LeaderSecondary,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Bold
                 )
             }

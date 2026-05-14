@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -73,8 +74,8 @@ fun TraceabilityTimelineRoute(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 ForestCard {
-                    Text("Traceability unavailable", style = MaterialTheme.typography.titleLarge)
-                    Text(state.message, modifier = Modifier.padding(top = 8.dp))
+                    Text("Traceability unavailable", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                    Text(state.message, modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                 }
                 OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = onBack) { Text("Back") }
             }
@@ -108,11 +109,11 @@ private fun TraceabilityTimelineScreen(
         }
         item {
             ForestCard {
-                Text(state.productName, style = MaterialTheme.typography.titleLarge)
-                Text("Supplier family: ${state.family?.familyName ?: "Unknown"}", modifier = Modifier.padding(top = 8.dp))
-                Text("Village: ${state.family?.village ?: state.fallbackVillage}", modifier = Modifier.padding(top = 4.dp))
-                Text("District: ${state.family?.district ?: "Not recorded"}", modifier = Modifier.padding(top = 4.dp))
-                Text("Region: ${state.family?.forestRegion ?: "Forest belt"}", modifier = Modifier.padding(top = 4.dp))
+                Text(state.productName, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text("Supplier family: ${state.family?.familyName ?: "Unknown"}", modifier = Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurface)
+                Text("Village: ${state.family?.village ?: state.fallbackVillage}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                Text("District: ${state.family?.district ?: "Not recorded"}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                Text("Region: ${state.family?.forestRegion ?: "Forest belt"}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -124,33 +125,34 @@ private fun TraceabilityTimelineScreen(
         }
         item {
             ForestCard {
-                Text("Family story", style = MaterialTheme.typography.titleLarge)
+                Text("Family story", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.secondary)
                         Text(
                             text = state.family?.story?.ifBlank {
                                 "The cooperative has not added a story for this family yet."
                             } ?: "The cooperative has not added a story for this family yet.",
                             modifier = Modifier.padding(top = 8.dp),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
             }
         }
         items(state.batches, key = { it.batchId }) { batch ->
             ForestCard {
-                Text("Batch ${batch.batchId}", style = MaterialTheme.typography.titleLarge)
-                Text("Harvest date: ${batch.harvestDate}", modifier = Modifier.padding(top = 6.dp))
-                Text("Origin: ${batch.originVillage}", modifier = Modifier.padding(top = 4.dp))
-                Text("${batch.quantity} ${batch.unit}", modifier = Modifier.padding(top = 4.dp))
-                Text("Status: ${batch.status}", modifier = Modifier.padding(top = 4.dp))
+                Text("Batch ${batch.batchId}", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.tertiary)
+                Text("Harvest date: ${batch.harvestDate}", modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface)
+                Text("Origin: ${batch.originVillage}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                Text("${batch.quantity} ${batch.unit}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text("Status: ${batch.status}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.secondary)
             }
         }
         items(state.logs, key = { it.logId }) { log ->
             ForestCard {
-                Text("Supply record", style = MaterialTheme.typography.titleLarge)
-                Text("Family: ${log.familyName}", modifier = Modifier.padding(top = 6.dp))
-                Text("Harvest date: ${log.harvestDate}", modifier = Modifier.padding(top = 4.dp))
-                Text("Batch: ${log.batchId}", modifier = Modifier.padding(top = 4.dp))
-                Text("${log.quantity} ${log.unit}", modifier = Modifier.padding(top = 4.dp))
+                Text("Supply record", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text("Family: ${log.familyName}", modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface)
+                Text("Harvest date: ${log.harvestDate}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                Text("Batch: ${log.batchId}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.tertiary)
+                Text("${log.quantity} ${log.unit}", modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
                 if (log.notes.isNotBlank()) {
-                    Text(log.notes, modifier = Modifier.padding(top = 6.dp))
+                    Text(log.notes, modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
             }
         }
